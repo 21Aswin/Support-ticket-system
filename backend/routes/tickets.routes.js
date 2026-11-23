@@ -9,6 +9,7 @@ router.use(authenticate);
 
 // Ticket CRUD
 router.get('/', ticketsController.list);
+router.post('/generate-description', ticketsController.generateDescription);
 router.post('/', authorize(['Employee', 'Admin']), ticketsController.create);
 router.get('/:id', ticketsController.getById);
 router.put('/:id', ticketsController.update);
