@@ -4,22 +4,67 @@
  */
 
 document.addEventListener('DOMContentLoaded', function () {
-  // 1. Mobile Sidebar Toggle
+  // 1. Sidebar Toggle (Both Desktop Collapsible & Mobile Drawer)
   const sidebar = document.querySelector('.app-sidebar');
-  const toggleBtn = document.querySelector('.sidebar-toggle-btn');
+  const toggleBtn = document.querySelector('.sidebar-toggle-btn') || document.getElementById('sidebarToggleBtn');
+  const collapseBtn = document.getElementById('sidebarCollapseBtn');
   const overlay = document.querySelector('.sidebar-overlay');
 
-  if (toggleBtn && sidebar && overlay) {
-    toggleBtn.addEventListener('click', function () {
-      sidebar.classList.toggle('show');
-      overlay.classList.toggle('show');
-    });
+  // Restore saved desktop collapsed state from localStorage
+  const savedState = localStorage.getItem('helpdesk_sidebar_collapsed');
+  if (savedState === 'true' && window.innerWidth >= 992) {
+    document.body.classList.add('sidebar-collapsed');
+  }
 
-    overlay.addEventListener('click', function () {
-      sidebar.classList.remove('show');
-      overlay.classList.remove('show');
+  function toggleSidebar() {
+    if (window.innerWidth < 992) {
+      // Mobile / Tablet drawer mode
+      sidebar.classList.toggle('show');
+      if (overlay) overlay.classList.toggle('show');
+    } else {
+      // Desktop collapse / expand mode
+      document.body.classList.toggle('sidebar-collapsed');
+      const isCollapsed = document.body.classList.contains('sidebar-collapsed');
+      localStorage.setItem('helpdesk_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+    }
+  }
+
+  function closeSidebar() {
+    if (window.innerWidth < 992) {
+      if (sidebar) sidebar.classList.remove('show');
+      if (overlay) overlay.classList.remove('show');
+    } else {
+      document.body.classList.add('sidebar-collapsed');
+      localStorage.setItem('helpdesk_sidebar_collapsed', 'true');
+    }
+  }
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      toggleSidebar();
     });
   }
+
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      closeSidebar();
+    });
+  }
+
+  if (overlay) {
+    overlay.addEventListener('click', function () {
+      closeSidebar();
+    });
+  }
+
+  // Close mobile sidebar on Escape key
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      closeSidebar();
+    }
+  });
 
   // 2. Prevent Double Submissions on Forms
   const forms = document.querySelectorAll('form[data-prevent-double-submit]');

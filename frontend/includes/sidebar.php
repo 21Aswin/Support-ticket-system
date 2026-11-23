@@ -19,6 +19,9 @@ if ($user && !empty($user['name'])) {
         <span>Support Portal</span>
       </div>
     </a>
+    <button type="button" class="sidebar-collapse-toggle-btn" id="sidebarCollapseBtn" aria-label="Collapse Menu" title="Close / Tuck Sidebar">
+      <i class="bi bi-x-lg"></i>
+    </button>
   </div>
 
   <ul class="sidebar-menu">

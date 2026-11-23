@@ -13,8 +13,8 @@ if ($user && !empty($user['name'])) {
 ?>
 <header class="app-topbar">
   <div class="topbar-left">
-    <button type="button" class="sidebar-toggle-btn" aria-label="Toggle navigation">
-      <i class="bi bi-list fs-5"></i>
+    <button type="button" class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Sidebar Menu" title="Toggle Sidebar Menu (Open / Close)">
+      <i class="bi bi-list fs-4"></i>
     </button>
     <form class="topbar-search-form" action="ticket-list.php" method="GET">
       <i class="bi bi-search topbar-search-icon"></i>
