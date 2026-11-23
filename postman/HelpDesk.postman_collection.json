@@ -394,6 +394,67 @@
           }
         }
       ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "1. List Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{supportToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications"]
+            }
+          }
+        },
+        {
+          "name": "2. Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{supportToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/unread-count",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "unread-count"]
+            }
+          }
+        },
+        {
+          "name": "3. Mark All Notifications as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{supportToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "read-all"]
+            }
+          }
+        },
+        {
+          "name": "4. Mark Ticket Notifications as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{supportToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/ticket/{{ticketId}}/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "ticket", "{{ticketId}}", "read"]
+            }
+          }
+        }
+      ]
     }
   ]
 }

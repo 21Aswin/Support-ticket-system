@@ -110,6 +110,15 @@ if ($user && !empty($user['name'])) {
     <!-- Settings & System -->
     <li class="menu-heading">Preferences</li>
     <li class="nav-item">
+      <a href="notifications.php" class="nav-link <?= $currentPage === 'notifications.php' ? 'active' : '' ?>">
+        <i class="bi bi-bell-fill"></i>
+        <span>Notifications</span>
+        <?php if (!empty($topbarUnreadCount) && $topbarUnreadCount > 0): ?>
+          <span class="badge bg-danger rounded-pill ms-auto" style="font-size: 10px;"><?= $topbarUnreadCount ?></span>
+        <?php endif; ?>
+      </a>
+    </li>
+    <li class="nav-item">
       <a href="settings.php" class="nav-link <?= $currentPage === 'settings.php' ? 'active' : '' ?>">
         <i class="bi bi-gear-fill"></i>
         <span>Settings</span>

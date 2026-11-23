@@ -334,6 +334,38 @@ async function updateTicketStatus(ticketId, nextStatus, { resolution, reason }, 
       [ticket.id, actor.id, ticket.status, nextStatus, historyDetails]
     );
 
+    // Create notifications for relevant parties
+    // (a) Notify ticket creator if someone else updated status
+    if (ticket.created_by && ticket.created_by !== actor.id) {
+      const notifType = nextStatus === 'Resolved' ? 'RESOLUTION' : 'STATUS_CHANGE';
+      const notifTitle = nextStatus === 'Resolved'
+        ? `Ticket Resolved: ${ticket.ticket_number}`
+        : `Ticket Status Update: ${ticket.ticket_number}`;
+      const notifMsg = nextStatus === 'Resolved'
+        ? `Your ticket '${ticket.title}' has been resolved. Resolution: ${currentResolution}`
+        : `Your ticket '${ticket.title}' status was moved to '${nextStatus}' by ${actor.name}.`;
+
+      await client.query(
+        `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
+         VALUES ($1, $2, $3, $4, $5, FALSE, NOW())`,
+        [ticket.created_by, ticket.id, notifType, notifTitle, notifMsg]
+      );
+    }
+
+    // (b) Notify assigned support staff if creator closed or reopened
+    if (ticket.assigned_to && ticket.assigned_to !== actor.id) {
+      await client.query(
+        `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
+         VALUES ($1, $2, 'STATUS_CHANGE', $3, $4, FALSE, NOW())`,
+        [
+          ticket.assigned_to,
+          ticket.id,
+          `Ticket ${nextStatus}: ${ticket.ticket_number}`,
+          `Ticket '${ticket.title}' was marked as ${nextStatus} by ${actor.name}.`,
+        ]
+      );
+    }
+
     await client.query('COMMIT');
 
     return {

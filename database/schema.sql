@@ -90,6 +90,18 @@ CREATE TABLE ticket_history (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 8. Notifications table
+CREATE TABLE notifications (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  ticket_id BIGINT REFERENCES tickets(id) ON DELETE CASCADE,
+  type VARCHAR(50) NOT NULL,
+  title VARCHAR(150) NOT NULL,
+  message TEXT NOT NULL,
+  is_read BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Indexes for performance
 CREATE INDEX idx_tickets_status ON tickets(status);
 CREATE INDEX idx_tickets_priority ON tickets(priority);
@@ -99,5 +111,7 @@ CREATE INDEX idx_tickets_category_id ON tickets(category_id);
 CREATE INDEX idx_comments_ticket ON ticket_comments(ticket_id);
 CREATE INDEX idx_history_ticket ON ticket_history(ticket_id);
 CREATE INDEX idx_assignments_ticket ON ticket_assignments(ticket_id);
+CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX idx_notifications_user_unread ON notifications(user_id, is_read);
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_role_id ON users(role_id);

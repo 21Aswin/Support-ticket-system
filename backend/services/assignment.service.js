@@ -132,6 +132,31 @@ async function assignTicket(ticketId, targetUserId, actor) {
       );
     }
 
+    // 8. Create notifications for Support Staff and Employee
+    await client.query(
+      `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
+       VALUES ($1, $2, 'ASSIGNMENT', $3, $4, FALSE, NOW())`,
+      [
+        targetUser.id,
+        ticket.id,
+        `New Ticket Assigned: ${ticket.ticket_number}`,
+        `You have been assigned to handle ticket '${ticket.title}' by ${actor.name}.`,
+      ]
+    );
+
+    if (ticket.created_by && ticket.created_by !== actor.id) {
+      await client.query(
+        `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
+         VALUES ($1, $2, 'STATUS_CHANGE', $3, $4, FALSE, NOW())`,
+        [
+          ticket.created_by,
+          ticket.id,
+          `Ticket Update: ${ticket.ticket_number}`,
+          `Your ticket '${ticket.title}' has been assigned to support specialist ${newAssigneeName}.`,
+        ]
+      );
+    }
+
     await client.query('COMMIT');
 
     return {

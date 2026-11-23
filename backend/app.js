@@ -7,6 +7,7 @@ const usersRoutes = require('./routes/users.routes');
 const ticketsRoutes = require('./routes/tickets.routes');
 const categoriesRoutes = require('./routes/categories.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
+const notificationsRoutes = require('./routes/notifications.routes');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/api/users', usersRoutes);
 app.use('/api/tickets', ticketsRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // 404 Route Handler
 app.use((req, res) => {

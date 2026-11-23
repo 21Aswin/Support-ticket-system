@@ -211,9 +211,10 @@ async function runTests() {
   assert(historyRes.status === 200 && historyRes.data.data.length >= 6, `Audit history records all 6+ events chronologically (Count: ${historyRes.data.data.length})`);
 
   // 25. Deactivate a user and verify login rejection
+  const tempEmail = `temp.user.${Date.now()}@helpdesk.local`;
   const testUser = await request('POST', '/api/users', {
     name: 'Temporary User',
-    email: 'temp.user@helpdesk.local',
+    email: tempEmail,
     password: 'Password123!',
     role_id: 3,
   }, adminToken);
@@ -223,7 +224,7 @@ async function runTests() {
   assert(deactRes.status === 200, 'Admin deactivates temporary user');
 
   const deactLogin = await request('POST', '/api/auth/login', {
-    email: 'temp.user@helpdesk.local',
+    email: tempEmail,
     password: 'Password123!',
   });
   assert(deactLogin.status === 403, 'Deactivated user login is blocked with 403 Forbidden');

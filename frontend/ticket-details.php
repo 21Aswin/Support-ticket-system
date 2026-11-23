@@ -68,6 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Automatically mark notifications for this ticket as read for the logged-in user
+api_request('PATCH', "/api/notifications/ticket/{$ticketId}/read");
+if (!empty($_GET['notif_id'])) {
+    api_request('PATCH', "/api/notifications/" . intval($_GET['notif_id']) . "/read");
+}
+
 // Fetch Ticket Details
 $ticketRes = api_request('GET', "/api/tickets/{$ticketId}");
 if ($ticketRes['status'] !== 200 || empty($ticketRes['body']['data'])) {
@@ -301,7 +307,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <?php endforeach; ?>
                   </select>
                 </div>
-                <button type="submit" class="btn btn-primary-custom w-100 justify-content-center" <?= $ticket['status'] === 'Closed' ? 'disabled' : '' ?>>
+                <button type="submit" id="btnAssignSubmit" class="btn btn-primary-custom w-100 justify-content-center" <?= $ticket['status'] === 'Closed' ? 'disabled' : '' ?>>
                   <i class="bi bi-person-check-fill"></i> <?= empty($ticket['assigned_to']) ? 'Assign Ticket' : 'Reassign Staff' ?>
                 </button>
               </form>
@@ -315,7 +321,7 @@ require_once __DIR__ . '/includes/sidebar.php';
               <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
               <input type="hidden" name="form_action" value="update_status">
               <input type="hidden" name="status" value="In Progress">
-              <button type="submit" class="btn btn-primary-custom w-100 justify-content-center">
+              <button type="submit" id="btnStartWork" class="btn btn-primary-custom w-100 justify-content-center">
                 <i class="bi bi-play-fill fs-5"></i> Start Investigation (In Progress)
               </button>
             </form>
@@ -323,7 +329,7 @@ require_once __DIR__ . '/includes/sidebar.php';
 
           <!-- SUPPORT STAFF: Mark Resolved (In Progress or Reopened -> Resolved) -->
           <?php if (($user['role'] === 'Support Staff' || $user['role'] === 'Admin') && in_array($ticket['status'], ['In Progress', 'Reopened'], true)): ?>
-            <button type="button" class="btn btn-success-custom w-100 justify-content-center mb-3" data-bs-toggle="modal" data-bs-target="#resolveModal">
+            <button type="button" id="btnOpenResolveModal" class="btn btn-success-custom w-100 justify-content-center mb-3" data-bs-toggle="modal" data-bs-target="#resolveModal">
               <i class="bi bi-check-lg fs-5"></i> Mark as Resolved
             </button>
           <?php endif; ?>
@@ -334,7 +340,7 @@ require_once __DIR__ . '/includes/sidebar.php';
               <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
               <input type="hidden" name="form_action" value="update_status">
               <input type="hidden" name="status" value="Closed">
-              <button type="submit" class="btn btn-outline-custom w-100 justify-content-center">
+              <button type="submit" id="btnConfirmClose" class="btn btn-outline-custom w-100 justify-content-center">
                 <i class="bi bi-check2-all text-success"></i> Confirm & Close Ticket
               </button>
             </form>
@@ -425,7 +431,7 @@ require_once __DIR__ . '/includes/sidebar.php';
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success-custom">
+            <button type="submit" id="btnSubmitResolution" class="btn btn-success-custom">
               <i class="bi bi-check-circle"></i> Submit Resolution
             </button>
           </div>

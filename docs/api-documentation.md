@@ -326,3 +326,99 @@ This document provides complete technical documentation for all HTTP REST API en
 - `POST /api/categories`: Create category (Admin only)
 - `PUT /api/categories/:id`: Rename category (Admin only)
 - `PATCH /api/categories/:id/status`: Toggle active status (Admin only)
+
+---
+
+## 6. Notifications Endpoints
+
+### 6.1 List User Notifications
+- **Endpoint**: `GET /api/notifications`
+- **Query Parameters**:
+  - `unread_only=true|false` (Optional, filter by unread status)
+  - `limit=50` (Optional pagination limit)
+  - `offset=0` (Optional pagination offset)
+- **Access**: Authenticated (Returns notifications for current authenticated user)
+- **Success (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Notifications retrieved successfully",
+    "data": [
+      {
+        "id": 1,
+        "user_id": 2,
+        "ticket_id": 17,
+        "type": "assigned",
+        "title": "New Ticket Assigned: HD-00017",
+        "message": "You have been assigned to handle ticket 'Laptop display flickering'...",
+        "is_read": false,
+        "created_at": "2026-11-23T10:19:00.000Z",
+        "ticket_number": "HD-00017",
+        "ticket_status": "Assigned",
+        "ticket_priority": "High"
+      }
+    ],
+    "meta": {
+      "unread_count": 1,
+      "total": 1
+    }
+  }
+  ```
+
+### 6.2 Get Unread Notification Count
+- **Endpoint**: `GET /api/notifications/unread-count`
+- **Access**: Authenticated
+- **Success (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Unread count retrieved successfully",
+    "data": {
+      "unread_count": 1
+    }
+  }
+  ```
+
+### 6.3 Mark Single Notification as Read
+- **Endpoint**: `PATCH /api/notifications/:id/read`
+- **Access**: Authenticated (User must own notification)
+- **Success (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Notification marked as read",
+    "data": {
+      "notification": { "id": 1, "is_read": true },
+      "unread_count": 0
+    }
+  }
+  ```
+
+### 6.4 Mark All Notifications as Read
+- **Endpoint**: `PATCH /api/notifications/read-all`
+- **Access**: Authenticated
+- **Success (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "All notifications marked as read",
+    "data": {
+      "unread_count": 0
+    }
+  }
+  ```
+
+### 6.5 Mark All Notifications for a Ticket as Read
+- **Endpoint**: `PATCH /api/notifications/ticket/:ticketId/read`
+- **Access**: Authenticated (Marks all unread notifications about this ticket for caller)
+- **Success (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Ticket notifications marked as read",
+    "data": {
+      "unread_count": 0
+    }
+  }
+  ```
+

@@ -77,9 +77,11 @@ document.addEventListener('DOMContentLoaded', function () {
           return false;
         }
         submitBtn.dataset.submitted = 'true';
-        submitBtn.disabled = true;
         const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+        setTimeout(function () {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+        }, 10);
         
         // Re-enable after timeout in case of client-side validation abortion
         setTimeout(function () {

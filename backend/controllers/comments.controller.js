@@ -68,6 +68,34 @@ async function addComment(req, res, next) {
       [ticketId, req.user.id, `Comment posted by ${req.user.name}`]
     );
 
+    // Notify ticket creator if someone else commented
+    if (ticket.created_by && ticket.created_by !== req.user.id) {
+      await db.query(
+        `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
+         VALUES ($1, $2, 'COMMENT', $3, $4, FALSE, NOW())`,
+        [
+          ticket.created_by,
+          ticket.id,
+          `New Comment: ${ticket.ticket_number}`,
+          `${req.user.name} added a comment on your ticket '${ticket.title}'.`,
+        ]
+      );
+    }
+
+    // Notify assigned staff if commenter is someone else
+    if (ticket.assigned_to && ticket.assigned_to !== req.user.id) {
+      await db.query(
+        `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
+         VALUES ($1, $2, 'COMMENT', $3, $4, FALSE, NOW())`,
+        [
+          ticket.assigned_to,
+          ticket.id,
+          `New Comment: ${ticket.ticket_number}`,
+          `${req.user.name} added a comment on ticket '${ticket.title}'.`,
+        ]
+      );
+    }
+
     return res.status(201).json({
       success: true,
       message: 'Comment added successfully',
