@@ -112,7 +112,7 @@ async function runFrontendTests() {
   const settingsPage = await request('/settings.php', {
     headers: { 'Cookie': sessionCookie },
   });
-  assert(settingsPage.status === 200 && settingsPage.data.includes('System Architecture Diagnostics'), 'Settings & Architecture diagnostics page rendered');
+  assert(settingsPage.status === 200 && settingsPage.data.includes('Profile Information') && settingsPage.data.includes('Change Password'), 'Settings & user profile page rendered');
 
   // 9. Employee Login session
   const empInit = await request('/login.php');

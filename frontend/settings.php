@@ -40,10 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $profileRes = api_request('GET', '/api/auth/profile');
 $profile = $profileRes['body']['data'] ?? $user;
 
-// Test API Health
-$healthRes = api_request('GET', '/api/health');
-$apiOnline = ($healthRes['status'] === 200);
-
 $csrfToken = get_csrf_token();
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/sidebar.php';
@@ -55,8 +51,8 @@ require_once __DIR__ . '/includes/sidebar.php';
   <main class="app-content">
     <div class="page-header">
       <div class="page-title">
-        <h2>Account Settings & System Info</h2>
-        <p>Manage your account credentials and inspect system health</p>
+        <h2>Account Settings & Profile</h2>
+        <p>Manage your account credentials and personal profile information</p>
       </div>
     </div>
 
@@ -75,9 +71,9 @@ require_once __DIR__ . '/includes/sidebar.php';
     <?php endif; ?>
 
     <div class="row g-4">
-      <!-- Profile Card & Password Update -->
+      <!-- Profile Information Card -->
       <div class="col-lg-6">
-        <div class="card-custom mb-4">
+        <div class="card-custom h-100">
           <div class="card-custom-header">
             <h5 class="card-custom-title"><i class="bi bi-person-badge-fill text-primary"></i> Profile Information</h5>
           </div>
@@ -102,11 +98,21 @@ require_once __DIR__ . '/includes/sidebar.php';
               <span class="text-muted d-block small">Account Status</span>
               <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Active</span>
             </div>
+            <div class="col-sm-6">
+              <span class="text-muted d-block small">Assigned Role</span>
+              <span class="fw-semibold text-dark"><?= e($profile['role'] ?? '') ?></span>
+            </div>
+            <div class="col-sm-6">
+              <span class="text-muted d-block small">Email Address</span>
+              <span class="fw-semibold text-dark"><?= e($profile['email'] ?? '') ?></span>
+            </div>
           </div>
         </div>
+      </div>
 
-        <!-- Change Password Card -->
-        <div class="card-custom">
+      <!-- Change Password Card -->
+      <div class="col-lg-6">
+        <div class="card-custom h-100">
           <div class="card-custom-header">
             <h5 class="card-custom-title"><i class="bi bi-shield-lock-fill text-primary"></i> Change Password</h5>
           </div>
@@ -129,69 +135,6 @@ require_once __DIR__ . '/includes/sidebar.php';
               <i class="bi bi-key-fill"></i> Update Password
             </button>
           </form>
-        </div>
-      </div>
-
-      <!-- System Architecture & Diagnostics -->
-      <div class="col-lg-6">
-        <div class="card-custom h-100">
-          <div class="card-custom-header">
-            <h5 class="card-custom-title"><i class="bi bi-cpu-fill text-info"></i> System Architecture Diagnostics</h5>
-          </div>
-
-          <p class="text-muted small mb-3">
-            Verified separation: PHP acts strictly as the presentation layer communicating via cURL REST APIs to Node.js. Node.js is the only layer with PostgreSQL database connectivity.
-          </p>
-
-          <ul class="list-group list-group-flush mb-4" style="font-size: 13px;">
-            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-              <div>
-                <div class="fw-semibold text-dark">Node.js Express Backend REST API</div>
-                <div class="text-muted small">Port 3000 (HTTP/JSON)</div>
-              </div>
-              <?php if ($apiOnline): ?>
-                <span class="badge bg-success text-white"><i class="bi bi-check-circle me-1"></i> Connected & Online</span>
-              <?php else: ?>
-                <span class="badge bg-danger text-white"><i class="bi bi-x-circle me-1"></i> Offline</span>
-              <?php endif; ?>
-            </li>
-
-            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-              <div>
-                <div class="fw-semibold text-dark">Database Persistence</div>
-                <div class="text-muted small">PostgreSQL (helpdesk_db)</div>
-              </div>
-              <span class="badge bg-success text-white"><i class="bi bi-database-check me-1"></i> Active via Node.js Pool</span>
-            </li>
-
-            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-              <div>
-                <div class="fw-semibold text-dark">Frontend Presentation Layer</div>
-                <div class="text-muted small">PHP <?= phpversion() ?> + Bootstrap 5</div>
-              </div>
-              <span class="badge bg-info text-white"><i class="bi bi-layers me-1"></i> Presentation Only</span>
-            </li>
-
-            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-              <div>
-                <div class="fw-semibold text-dark">Authentication Mechanism</div>
-                <div class="text-muted small">Signed JWT + Server-side PHP Session</div>
-              </div>
-              <span class="badge bg-primary text-white"><i class="bi bi-shield-check me-1"></i> HttpOnly Protected</span>
-            </li>
-
-            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-              <div>
-                <div class="fw-semibold text-dark">Password Security</div>
-                <div class="text-muted small">bcrypt (10 rounds salt)</div>
-              </div>
-              <span class="badge bg-secondary text-white"><i class="bi bi-hash me-1"></i> Irreversible Hash</span>
-            </li>
-          </ul>
-
-          <div class="alert alert-info py-2" style="font-size: 12.5px;">
-            <i class="bi bi-info-circle-fill me-1"></i> Direct database queries from PHP are strictly disabled and not supported by design.
-          </div>
         </div>
       </div>
     </div>
