@@ -73,6 +73,46 @@ This document provides complete technical documentation for all HTTP REST API en
   }
   ```
 
+### 1.2 User Registration (Create Account)
+- **Endpoint**: `POST /api/auth/register`
+- **Access**: Public
+- **Request Body**:
+  ```json
+  {
+    "name": "Alex Morgan",
+    "email": "alex.morgan@helpdesk.local",
+    "password": "Password123!",
+    "confirm_password": "Password123!"
+  }
+  ```
+- **Success (201 Created)**: Returns JWT token and registered Employee profile.
+- **Error (409 Conflict)**: Email is already registered.
+
+### 1.3 Forgot Password (Request Reset)
+- **Endpoint**: `POST /api/auth/forgot-password`
+- **Access**: Public
+- **Request Body**:
+  ```json
+  {
+    "email": "employee@helpdesk.local"
+  }
+  ```
+- **Success (200 OK)**: Returns confirmation and reset token (`reset_token`).
+
+### 1.4 Reset Password (Set New Password)
+- **Endpoint**: `POST /api/auth/reset-password`
+- **Access**: Public
+- **Request Body**:
+  ```json
+  {
+    "token": "d7a4b8e...",
+    "password": "BrandNewPassword123!",
+    "confirm_password": "BrandNewPassword123!"
+  }
+  ```
+- **Success (200 OK)**: Password updated; invalidates reset token.
+
+
 ### 1.2 Get Authenticated Profile
 - **Endpoint**: `GET /api/auth/profile`
 - **Access**: Authenticated (All roles)

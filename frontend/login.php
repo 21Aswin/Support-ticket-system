@@ -161,16 +161,25 @@ $csrfToken = get_csrf_token();
       <div class="form-group mb-4">
         <div class="d-flex justify-content-between align-items-center mb-1">
           <label for="password" class="form-label mb-0">Password</label>
+          <a href="forgot-password.php" class="text-primary text-decoration-none small">Forgot password?</a>
         </div>
         <div class="input-group">
           <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-lock"></i></span>
-          <input type="password" id="password" name="password" class="form-control form-control-custom border-start-0" placeholder="Enter your password" required>
+          <input type="password" id="password" name="password" class="form-control form-control-custom border-start-0 border-end-0" placeholder="Enter your password" required>
+          <button type="button" class="btn btn-outline-secondary border-start-0 bg-white text-muted password-toggle-btn" data-target="password" title="Show password" tabindex="-1">
+            <i class="bi bi-eye"></i>
+          </button>
         </div>
       </div>
 
       <button type="submit" class="btn btn-primary-custom w-100 justify-content-center py-2 fs-6">
         <i class="bi bi-box-arrow-in-right"></i> Sign In to Portal
       </button>
+
+      <div class="text-center mt-3">
+        <span class="text-muted small">Don't have an account?</span>
+        <a href="register.php" class="text-primary fw-semibold small text-decoration-none ms-1">Create an Account</a>
+      </div>
     </form>
 
     <!-- Quick Demo Credential Pills for Easy Local Review -->

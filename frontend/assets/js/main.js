@@ -116,6 +116,37 @@ document.addEventListener('DOMContentLoaded', function () {
       setTimeout(function () { alert.remove(); }, 400);
     }, 5000);
   });
+
+  // 5. Universal Password Visibility Toggle (Eye icon)
+  document.addEventListener('click', function (e) {
+    const toggleBtn = e.target.closest('.password-toggle-btn');
+    if (!toggleBtn) return;
+    e.preventDefault();
+
+    const targetId = toggleBtn.getAttribute('data-target');
+    let input = targetId ? document.getElementById(targetId) : null;
+    if (!input) {
+      input = toggleBtn.closest('.input-group')?.querySelector('input') ||
+              toggleBtn.closest('.password-input-group')?.querySelector('input');
+    }
+    if (!input) return;
+
+    const isPassword = input.getAttribute('type') === 'password';
+    input.setAttribute('type', isPassword ? 'text' : 'password');
+
+    const icon = toggleBtn.querySelector('i');
+    if (icon) {
+      if (isPassword) {
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+        toggleBtn.setAttribute('title', 'Hide password');
+      } else {
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+        toggleBtn.setAttribute('title', 'Show password');
+      }
+    }
+  });
 });
 
 /**

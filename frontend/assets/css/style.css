@@ -1223,3 +1223,24 @@ textarea.form-control-custom {
   color: var(--text-muted);
 }
 
+/* Password Visibility Toggle */
+.password-toggle-btn {
+  background-color: #ffffff !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-muted) !important;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.password-toggle-btn:hover {
+  color: var(--secondary-blue) !important;
+  background-color: var(--light-blue) !important;
+}
+
+.password-toggle-btn:focus {
+  box-shadow: none !important;
+  border-color: var(--secondary-blue) !important;
+  color: var(--secondary-blue) !important;
+}
+
+

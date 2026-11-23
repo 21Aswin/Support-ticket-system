@@ -123,12 +123,22 @@ require_once __DIR__ . '/includes/sidebar.php';
 
             <div class="form-group mb-3">
               <label for="new_password" class="form-label">New Password</label>
-              <input type="password" id="new_password" name="new_password" class="form-control form-control-custom" placeholder="Minimum 6 characters" required minlength="6">
+              <div class="input-group">
+                <input type="password" id="new_password" name="new_password" class="form-control form-control-custom border-end-0" placeholder="Minimum 6 characters" required minlength="6">
+                <button type="button" class="btn btn-outline-secondary border-start-0 bg-white text-muted password-toggle-btn" data-target="new_password" title="Show password" tabindex="-1">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
             </div>
 
             <div class="form-group mb-4">
               <label for="confirm_password" class="form-label">Confirm New Password</label>
-              <input type="password" id="confirm_password" name="confirm_password" class="form-control form-control-custom" placeholder="Re-type new password" required minlength="6">
+              <div class="input-group">
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control form-control-custom border-end-0" placeholder="Re-type new password" required minlength="6">
+                <button type="button" class="btn btn-outline-secondary border-start-0 bg-white text-muted password-toggle-btn" data-target="confirm_password" title="Show password" tabindex="-1">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
             </div>
 
             <button type="submit" class="btn btn-primary-custom">
