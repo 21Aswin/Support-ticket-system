@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment files
+.env
+backend/.env
+frontend/.env
+*.env.local
+
+# Database data directories
+pg_data/
+*.log
+
+# Operating System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+
+# Session and temp files
+sessions/
+*.tmp

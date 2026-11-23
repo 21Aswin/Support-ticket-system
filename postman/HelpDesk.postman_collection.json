@@ -1,0 +1,399 @@
+{
+  "info": {
+    "_postman_id": "7b8e1a2f-9c4d-4e5a-8d1b-2f6e7c8a9b0c",
+    "name": "HelpDesk REST API Collection",
+    "description": "Comprehensive Postman collection for the HelpDesk Support Ticket Management System REST API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "supportToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "employeeToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ticketId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "1. Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@helpdesk.local\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "2. Support Staff Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"support@helpdesk.local\",\n  \"password\": \"Support@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "3. Employee Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"employee@helpdesk.local\",\n  \"password\": \"Employee@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "4. Get Current Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets Management",
+      "item": [
+        {
+          "name": "1. Create Ticket (Employee/Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{employeeToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Laptop cannot connect to office Wi-Fi\",\n  \"description\": \"Cannot connect to Corp-Secure SSID after password rotation.\",\n  \"category_id\": 3,\n  \"priority\": \"High\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets"]
+            }
+          }
+        },
+        {
+          "name": "2. List Tickets (Scoped by Role)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets?status=Open&limit=20&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets"],
+              "query": [
+                { "key": "status", "value": "Open" },
+                { "key": "limit", "value": "20" },
+                { "key": "offset", "value": "0" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Get Ticket Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{ticketId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{ticketId}}"]
+            }
+          }
+        },
+        {
+          "name": "4. Assign Ticket (Admin Only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assigned_to\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{ticketId}}/assign",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{ticketId}}", "assign"]
+            }
+          }
+        },
+        {
+          "name": "5. Update Status: Start Work (Support Staff)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{supportToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"In Progress\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{ticketId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{ticketId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "6. Update Status: Resolve (Support Staff)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{supportToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Resolved\",\n  \"resolution\": \"Renewed 802.1x enterprise certificate and flushed DNS.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{ticketId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{ticketId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "7. Update Status: Close (Employee/Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{employeeToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Closed\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{ticketId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{ticketId}}", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comments & History",
+      "item": [
+        {
+          "name": "1. Get Comments",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{ticketId}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{ticketId}}", "comments"]
+            }
+          }
+        },
+        {
+          "name": "2. Post Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{supportToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"Checked the device MAC address and re-authenticated on radius server.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{ticketId}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{ticketId}}", "comments"]
+            }
+          }
+        },
+        {
+          "name": "3. Get Ticket Audit History",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{ticketId}}/history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{ticketId}}", "history"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard & Analytics",
+      "item": [
+        {
+          "name": "1. Get Dashboard Stats (Role-Scoped)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "stats"]
+            }
+          }
+        },
+        {
+          "name": "2. Get Recent Tickets",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/recent-tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "recent-tickets"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories & Users",
+      "item": [
+        {
+          "name": "1. List Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories"]
+            }
+          }
+        },
+        {
+          "name": "2. Create Category (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Telephony Issue\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories"]
+            }
+          }
+        },
+        {
+          "name": "3. List Users (Admin Only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            }
+          }
+        },
+        {
+          "name": "4. Create User (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Robert Fox\",\n  \"email\": \"robert.fox@helpdesk.local\",\n  \"password\": \"Password123!\",\n  \"role_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
