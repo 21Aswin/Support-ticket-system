@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const notificationService = require('./notification.service');
 const { generateTicketNumber } = require('../utils/generateTicketNumber');
 
 const VALID_PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
@@ -128,26 +129,13 @@ async function createTicket({ title, description, category_id, priority = 'Mediu
     );
 
     // Notify all active Administrators about the newly raised ticket
-    const adminUsersRes = await client.query(
-      `SELECT u.id FROM users u
-       JOIN roles r ON u.role_id = r.id
-       WHERE r.name = 'Admin' AND u.is_active = TRUE`
-    );
-
-    for (const admin of adminUsersRes.rows) {
-      if (admin.id !== actor.id) {
-        await client.query(
-          `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
-           VALUES ($1, $2, 'TICKET_CREATED', $3, $4, FALSE, NOW())`,
-          [
-            admin.id,
-            ticket.id,
-            `New Ticket Raised: ${ticket.ticket_number}`,
-            `${actor.name} submitted a new ${priority} priority ticket: '${ticket.title}'.`,
-          ]
-        );
-      }
-    }
+    await notificationService.notifyAllAdmins(client, {
+      ticket_id: ticket.id,
+      type: 'TICKET_CREATED',
+      title: `New Ticket Raised: ${ticket.ticket_number}`,
+      message: `${actor.name} submitted a new ${priority} priority ticket: '${ticket.title}'.`,
+      excludeUserId: actor.role === 'Admin' ? actor.id : null,
+    });
 
     // Also notify the creator (employee) with submission confirmation
     await client.query(
@@ -400,28 +388,14 @@ async function updateTicketStatus(ticketId, nextStatus, { resolution, reason }, 
       );
     }
 
-    // (c) Notify Admins when a ticket is reopened so they can re-evaluate or reassign
-    if (nextStatus === 'Reopened') {
-      const adminUsersRes = await client.query(
-        `SELECT u.id FROM users u
-         JOIN roles r ON u.role_id = r.id
-         WHERE r.name = 'Admin' AND u.is_active = TRUE`
-      );
-      for (const admin of adminUsersRes.rows) {
-        if (admin.id !== actor.id) {
-          await client.query(
-            `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
-             VALUES ($1, $2, 'TICKET_REOPENED', $3, $4, FALSE, NOW())`,
-            [
-              admin.id,
-              ticket.id,
-              `Ticket Reopened: ${ticket.ticket_number}`,
-              `${actor.name} reopened ticket '${ticket.title}'. Reason: ${reason ? reason.trim() : 'Unresolved issue'}`,
-            ]
-          );
-        }
-      }
-    }
+    // (c) Notify Admins about every status change
+    await notificationService.notifyAllAdmins(client, {
+      ticket_id: ticket.id,
+      type: nextStatus === 'Resolved' ? 'RESOLUTION' : (nextStatus === 'Reopened' ? 'TICKET_REOPENED' : 'STATUS_CHANGE'),
+      title: `Ticket ${nextStatus}: ${ticket.ticket_number}`,
+      message: `${actor.name} changed status of '${ticket.title}' to ${nextStatus}.${nextStatus === 'Resolved' && currentResolution ? ' Resolution: ' + currentResolution : ''}${nextStatus === 'Reopened' && reason ? ' Reason: ' + reason.trim() : ''}`,
+      excludeUserId: actor.role === 'Admin' ? actor.id : null,
+    });
 
     await client.query('COMMIT');
 
@@ -500,7 +474,18 @@ async function updateTicket(ticketId, fields, actor) {
   `;
 
   const res = await db.query(sql, params);
-  return res.rows[0];
+  const updatedTicket = res.rows[0];
+
+  // Notify Admins about ticket update
+  await notificationService.notifyAllAdmins(db, {
+    ticket_id: updatedTicket.id,
+    type: 'TICKET_UPDATED',
+    title: `Ticket Details Updated: ${ticket.ticket_number}`,
+    message: `${actor.name} updated ticket '${ticket.title}' details.`,
+    excludeUserId: actor.role === 'Admin' ? actor.id : null,
+  });
+
+  return updatedTicket;
 }
 
 module.exports = {

@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const notificationService = require('./notification.service');
 
 /**
  * Assigns or reassigns a ticket to a support staff member inside a transaction.
@@ -156,6 +157,15 @@ async function assignTicket(ticketId, targetUserId, actor) {
         ]
       );
     }
+
+    // Notify all active Administrators about ticket assignment
+    await notificationService.notifyAllAdmins(client, {
+      ticket_id: ticket.id,
+      type: 'ASSIGNMENT',
+      title: `Ticket Assigned: ${ticket.ticket_number}`,
+      message: `Ticket '${ticket.title}' was assigned to ${newAssigneeName} by ${actor.name}.`,
+      excludeUserId: actor.role === 'Admin' ? actor.id : null,
+    });
 
     await client.query('COMMIT');
 

@@ -119,8 +119,32 @@ async function markTicketNotificationsAsRead(ticketId, userId) {
   };
 }
 
+/**
+ * Notify all active Administrators about any action across the system
+ * @param {import('pg').PoolClient|object} clientOrDb
+ * @param {object} param1
+ */
+async function notifyAllAdmins(clientOrDb, { ticket_id = null, type, title, message, excludeUserId = null }) {
+  const query = typeof clientOrDb.query === 'function' ? clientOrDb.query.bind(clientOrDb) : db.query.bind(db);
+  const adminRes = await query(
+    `SELECT u.id FROM users u
+     JOIN roles r ON u.role_id = r.id
+     WHERE r.name = 'Admin' AND u.is_active = TRUE`
+  );
+
+  for (const admin of adminRes.rows) {
+    if (excludeUserId && admin.id === excludeUserId) continue;
+    await query(
+      `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
+       VALUES ($1, $2, $3, $4, $5, FALSE, NOW())`,
+      [admin.id, ticket_id, type, title.trim(), message.trim()]
+    );
+  }
+}
+
 module.exports = {
   createNotification,
+  notifyAllAdmins,
   getUserNotifications,
   getUnreadCount,
   markAsRead,

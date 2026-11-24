@@ -1,5 +1,6 @@
 const db = require('../config/database');
 const ticketService = require('../services/ticket.service');
+const notificationService = require('../services/notification.service');
 
 async function getComments(req, res, next) {
   try {
@@ -31,15 +32,17 @@ async function getComments(req, res, next) {
 async function addComment(req, res, next) {
   try {
     const ticketId = req.params.id;
-    const { comment } = req.body;
+    const rawComment = req.body.comment || req.body.content || '';
 
-    if (!comment || comment.trim() === '') {
+    if (!rawComment || rawComment.trim() === '') {
       return res.status(400).json({
         success: false,
         message: 'Comment text cannot be empty.',
         errors: ['Missing comment body'],
       });
     }
+
+    const comment = rawComment.trim();
 
     // Check permission
     const ticket = await ticketService.getTicketById(ticketId, req.user);
@@ -58,7 +61,7 @@ async function addComment(req, res, next) {
       VALUES ($1, $2, $3, NOW())
       RETURNING *
     `;
-    const result = await db.query(insertSql, [ticketId, req.user.id, comment.trim()]);
+    const result = await db.query(insertSql, [ticketId, req.user.id, comment]);
     const newComment = result.rows[0];
 
     // Record comment event in history
@@ -96,28 +99,15 @@ async function addComment(req, res, next) {
       );
     }
 
-    // If ticket has no assigned staff, notify active Admins about the comment
-    if (!ticket.assigned_to) {
-      const adminUsersRes = await db.query(
-        `SELECT u.id FROM users u
-         JOIN roles r ON u.role_id = r.id
-         WHERE r.name = 'Admin' AND u.is_active = TRUE`
-      );
-      for (const admin of adminUsersRes.rows) {
-        if (admin.id !== req.user.id) {
-          await db.query(
-            `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
-             VALUES ($1, $2, 'COMMENT', $3, $4, FALSE, NOW())`,
-            [
-              admin.id,
-              ticket.id,
-              `New Comment on Unassigned Ticket: ${ticket.ticket_number}`,
-              `${req.user.name} added a comment on '${ticket.title}'.`,
-            ]
-          );
-        }
-      }
-    }
+    // Notify all active Administrators about any comment
+    const commentPreview = comment.length > 60 ? comment.substring(0, 60) + '...' : comment;
+    await notificationService.notifyAllAdmins(db, {
+      ticket_id: ticket.id,
+      type: 'COMMENT',
+      title: `New Comment: ${ticket.ticket_number}`,
+      message: `${req.user.name} added a comment on '${ticket.title}': "${commentPreview}"`,
+      excludeUserId: req.user.role === 'Admin' ? req.user.id : null,
+    });
 
     return res.status(201).json({
       success: true,

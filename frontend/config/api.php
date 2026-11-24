@@ -81,6 +81,11 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 function get_api_base_url() {
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    // If running in local development environment, talk directly to local Node.js backend
+    if (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false) {
+        return 'http://127.0.0.1:3000';
+    }
     $envUrl = get_config('HELPDESK_API_URL') ?: get_config('PHP_API_BASE_URL');
     if ($envUrl) {
         return rtrim($envUrl, '/');
