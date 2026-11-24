@@ -1,0 +1,29 @@
+# ============================================================
+# HelpDesk Root Server Configuration - Hostinger Web Hosting
+# Protects internal files and routes traffic to the frontend
+# ============================================================
+
+# 1. Prevent Directory Browsing
+Options -Indexes +FollowSymLinks
+
+# 2. Deny Web Access to Internal Directories
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block direct access to backend, database, e2e, tests and internal folders
+    RewriteRule ^(backend|database|e2e|tests|node_modules)(\/.*)?$ - [F,L,NC]
+</IfModule>
+
+# 3. Deny Web Access to Sensitive Files
+<FilesMatch "(^\.env|^\.git|\.sql$|\.log$|\.md$|package\.json|package-lock\.json|playwright\.config\.js|ecosystem\.config\.js)">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# 4. Security Headers
+<IfModule mod_headers.c>
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

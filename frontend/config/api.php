@@ -5,8 +5,41 @@
  * PHP never queries PostgreSQL directly.
  */
 
+/**
+ * Multi-layer Configuration Resolver
+ * Checks: 1) System environment (getenv / $_ENV / $_SERVER)
+ *         2) Optional frontend/config/env.php
+ *         3) Default fallback
+ */
+function get_config($key, $default = null) {
+    static $localConfig = null;
+    if ($localConfig === null) {
+        $envFile = __DIR__ . '/env.php';
+        if (file_exists($envFile)) {
+            $localConfig = require $envFile;
+        } else {
+            $localConfig = [];
+        }
+    }
+
+    $val = getenv($key);
+    if ($val !== false && $val !== '') {
+        return $val;
+    }
+    if (!empty($_ENV[$key])) {
+        return $_ENV[$key];
+    }
+    if (!empty($_SERVER[$key])) {
+        return $_SERVER[$key];
+    }
+    if (isset($localConfig[$key])) {
+        return $localConfig[$key];
+    }
+    return $default;
+}
+
 // Application Timezone configuration (Defaults to Asia/Kolkata - IST UTC+05:30)
-$appTimezone = getenv('APP_TIMEZONE') ?: 'Asia/Kolkata';
+$appTimezone = get_config('APP_TIMEZONE', 'Asia/Kolkata');
 date_default_timezone_set($appTimezone);
 
 /**
@@ -48,7 +81,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 function get_api_base_url() {
-    $envUrl = getenv('HELPDESK_API_URL') ?: getenv('PHP_API_BASE_URL');
+    $envUrl = get_config('HELPDESK_API_URL') ?: get_config('PHP_API_BASE_URL');
     if ($envUrl) {
         return rtrim($envUrl, '/');
     }

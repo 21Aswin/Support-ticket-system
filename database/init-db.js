@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../backend/.env') });
 const { Client } = require('../backend/node_modules/pg');
 
 const config = {
@@ -10,29 +11,49 @@ const config = {
 };
 
 async function run() {
-  console.log(`Connecting to PostgreSQL at ${config.host}:${config.port} as ${config.user}...`);
-  
-  // Step 1: Connect to default postgres DB to create helpdesk_db if needed
-  const adminClient = new Client({ ...config, database: 'postgres' });
-  await adminClient.connect();
+  let dbClient;
 
-  const checkDb = await adminClient.query(
-    "SELECT 1 FROM pg_database WHERE datname = 'helpdesk_db'"
-  );
-
-  if (checkDb.rows.length === 0) {
-    console.log("Database 'helpdesk_db' does not exist. Creating...");
-    await adminClient.query("CREATE DATABASE helpdesk_db;");
-    console.log("Database 'helpdesk_db' created successfully.");
+  if (process.env.DATABASE_URL) {
+    console.log(`Connecting to PostgreSQL via DATABASE_URL...`);
+    dbClient = new Client({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.DB_SSL === 'false' ? false : { rejectUnauthorized: false }
+    });
+    await dbClient.connect();
+    console.log("Connected to target database successfully.");
   } else {
-    console.log("Database 'helpdesk_db' already exists.");
-  }
-  await adminClient.end();
+    console.log(`Connecting to PostgreSQL at ${config.host}:${config.port} as ${config.user}...`);
+    
+    // Step 1: Connect to default postgres DB to create helpdesk_db if needed
+    try {
+      const adminClient = new Client({ ...config, database: 'postgres' });
+      await adminClient.connect();
 
-  // Step 2: Connect to helpdesk_db and run schema.sql and seed.sql
-  const dbClient = new Client({ ...config, database: 'helpdesk_db' });
-  await dbClient.connect();
-  console.log("Connected to 'helpdesk_db'.");
+      const checkDb = await adminClient.query(
+        "SELECT 1 FROM pg_database WHERE datname = 'helpdesk_db'"
+      );
+
+      if (checkDb.rows.length === 0) {
+        console.log("Database 'helpdesk_db' does not exist. Creating...");
+        await adminClient.query("CREATE DATABASE helpdesk_db;");
+        console.log("Database 'helpdesk_db' created successfully.");
+      } else {
+        console.log("Database 'helpdesk_db' already exists.");
+      }
+      await adminClient.end();
+    } catch (err) {
+      console.warn("Could not check/create database via postgres admin (continuing):", err.message);
+    }
+
+    // Step 2: Connect to helpdesk_db
+    dbClient = new Client({
+      ...config,
+      database: process.env.DB_NAME || 'helpdesk_db',
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
+    });
+    await dbClient.connect();
+    console.log(`Connected to '${process.env.DB_NAME || 'helpdesk_db'}'.`);
+  }
 
   const schemaSql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
   console.log("Executing schema.sql...");
