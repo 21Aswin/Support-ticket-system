@@ -1,5 +1,27 @@
 const { Pool } = require('pg');
+const dns = require('dns');
 require('dotenv').config();
+
+// Public DNS resolver fallback for local ISP DNS limitations
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+  const origLookup = dns.lookup;
+  dns.lookup = (hostname, options, callback) => {
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+    dns.resolve4(hostname, (err, addrs) => {
+      if (!err && addrs && addrs.length > 0) {
+        if (options && options.all) {
+          return callback(null, addrs.map(a => ({ address: a, family: 4 })));
+        }
+        return callback(null, addrs[0], 4);
+      }
+      return origLookup(hostname, options, callback);
+    });
+  };
+} catch (e) {}
 
 const poolConfig = process.env.DATABASE_URL
   ? {
