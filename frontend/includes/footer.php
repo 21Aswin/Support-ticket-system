@@ -9,5 +9,6 @@
 
 <!-- Custom App Interactive Script -->
 <script src="assets/js/main.js"></script>
+<script src="assets/js/custom-select.js"></script>
 </body>
 </html>

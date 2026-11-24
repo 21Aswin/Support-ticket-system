@@ -144,7 +144,7 @@ require_once __DIR__ . '/includes/sidebar.php';
               <div class="row g-3 mb-3">
                 <div class="col-md-6">
                   <label for="category_id" class="form-label">Issue Category <span class="text-danger">*</span></label>
-                  <select id="category_id" name="category_id" class="form-select form-control-custom" required>
+                  <select id="category_id" name="category_id" class="form-select form-control-custom" data-custom-select="true" required>
                     <option value="">-- Select a Category --</option>
                     <?php foreach ($categories as $cat): ?>
                       <option value="<?= e($cat['id']) ?>" <?= (isset($_POST['category_id']) && $_POST['category_id'] == $cat['id']) ? 'selected' : '' ?>>
@@ -156,7 +156,7 @@ require_once __DIR__ . '/includes/sidebar.php';
 
                 <div class="col-md-6">
                   <label for="priority" class="form-label">Priority Level <span class="text-danger">*</span></label>
-                  <select id="priority" name="priority" class="form-select form-control-custom" required>
+                  <select id="priority" name="priority" class="form-select form-control-custom" data-custom-select="true" required>
                     <option value="Low" <?= (isset($_POST['priority']) && $_POST['priority'] === 'Low') ? 'selected' : '' ?>>Low - Non-urgent inquiry or minor request</option>
                     <option value="Medium" <?= (!isset($_POST['priority']) || $_POST['priority'] === 'Medium') ? 'selected' : '' ?>>Medium - Normal day-to-day work impediment</option>
                     <option value="High" <?= (isset($_POST['priority']) && $_POST['priority'] === 'High') ? 'selected' : '' ?>>High - Significant disruption to productivity</option>
