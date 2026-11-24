@@ -41,25 +41,36 @@ $topbarUnreadCount = $notifOverviewRes['body']['meta']['unread_count'] ?? 0;
           <div class="p-3 bg-light border-bottom d-flex align-items-center justify-content-between">
             <span class="fw-bold text-dark" style="font-size: 13px;">
               <i class="bi bi-bell-fill me-1 text-primary"></i> Notifications
-              <?php if ($topbarUnreadCount > 0): ?>
-                <span class="badge bg-danger rounded-pill ms-1" style="font-size: 10px;"><?= $topbarUnreadCount ?> new</span>
-              <?php endif; ?>
+              <span class="badge bg-danger rounded-pill ms-1 notif-badge-pill" id="notifDropdownBadge" style="<?= $topbarUnreadCount > 0 ? '' : 'display:none;' ?>">
+                <?= $topbarUnreadCount ?> new
+              </span>
             </span>
-            <a href="notifications.php" class="small text-primary text-decoration-none">View All</a>
+            <div class="d-flex align-items-center gap-2">
+              <?php if ($topbarUnreadCount > 0): ?>
+                <button type="button" id="btnMarkAllReadTopbar" class="btn btn-link p-0 text-decoration-none text-muted" style="font-size: 11px;" title="Mark all notifications as read">
+                  <i class="bi bi-check2-all"></i> Mark all read
+                </button>
+                <span class="text-muted" style="font-size: 10px;">•</span>
+              <?php endif; ?>
+              <a href="notifications.php" class="small text-primary text-decoration-none fw-medium" style="font-size: 11.5px;">View All</a>
+            </div>
           </div>
 
-          <div style="max-height: 280px; overflow-y: auto;">
+          <div style="max-height: 280px; overflow-y: auto;" id="topbarNotifList">
             <?php if (!empty($topbarNotifications)): ?>
               <?php foreach ($topbarNotifications as $tn): ?>
                 <?php
                   $isUnread = !$tn['is_read'];
-                  $linkUrl = !empty($tn['ticket_id']) 
-                    ? "ticket-details.php?id={$tn['ticket_id']}&notif_id={$tn['id']}" 
-                    : "notifications.php";
+                  $targetTicketId = !empty($tn['ticket_id']) ? intval($tn['ticket_id']) : 0;
+                  $linkUrl = "notification-read.php?id={$tn['id']}" . ($targetTicketId > 0 ? "&ticket_id={$targetTicketId}" : "");
                 ?>
-                <a href="<?= e($linkUrl) ?>" class="notif-dropdown-item <?= $isUnread ? 'unread' : '' ?>">
+                <a href="<?= e($linkUrl) ?>" 
+                   class="notif-dropdown-item <?= $isUnread ? 'unread' : '' ?>"
+                   data-notif-id="<?= e($tn['id']) ?>"
+                   data-ticket-id="<?= e($targetTicketId) ?>"
+                   data-is-unread="<?= $isUnread ? '1' : '0' ?>">
                   <div class="d-flex align-items-start justify-content-between mb-1">
-                    <span class="fw-semibold small text-dark <?= $isUnread ? 'text-primary' : '' ?>">
+                    <span class="fw-semibold small text-dark <?= $isUnread ? 'text-primary' : '' ?> notif-item-title">
                       <?= e($tn['title']) ?>
                     </span>
                     <span class="text-muted" style="font-size: 10px; white-space: nowrap;">
@@ -117,3 +128,77 @@ $topbarUnreadCount = $notifOverviewRes['body']['meta']['unread_count'] ?? 0;
     </div>
   </div>
 </header>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const bellBadge = document.querySelector('.notification-badge-count');
+  const dropdownBadge = document.getElementById('notifDropdownBadge');
+  const btnMarkAll = document.getElementById('btnMarkAllReadTopbar');
+
+  function updateBadgeDisplay(count) {
+    if (count <= 0) {
+      if (bellBadge) bellBadge.style.display = 'none';
+      if (dropdownBadge) dropdownBadge.style.display = 'none';
+      if (btnMarkAll) btnMarkAll.style.display = 'none';
+    } else {
+      if (bellBadge) {
+        bellBadge.style.display = 'flex';
+        bellBadge.textContent = count > 99 ? '99+' : count;
+      }
+      if (dropdownBadge) {
+        dropdownBadge.style.display = 'inline-block';
+        dropdownBadge.textContent = count + ' new';
+      }
+    }
+  }
+
+  // Handle clicking individual notification in dropdown
+  document.querySelectorAll('.notif-dropdown-item[data-is-unread="1"]').forEach(item => {
+    item.addEventListener('click', function (e) {
+      this.classList.remove('unread');
+      this.dataset.isUnread = '0';
+      const titleSpan = this.querySelector('.notif-item-title');
+      if (titleSpan) titleSpan.classList.remove('text-primary');
+
+      // Instantly reduce count
+      let currentVal = parseInt(bellBadge ? bellBadge.textContent : '0') || 0;
+      if (currentVal > 0) {
+        updateBadgeDisplay(currentVal - 1);
+      }
+    });
+  });
+
+  // Handle Mark All as Read button
+  if (btnMarkAll) {
+    btnMarkAll.addEventListener('click', async function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      btnMarkAll.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+      btnMarkAll.disabled = true;
+
+      try {
+        const res = await fetch('notification-read.php?action=mark_all_read', {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await res.json();
+        if (data.success) {
+          updateBadgeDisplay(0);
+          document.querySelectorAll('.notif-dropdown-item.unread').forEach(item => {
+            item.classList.remove('unread');
+            item.dataset.isUnread = '0';
+            const titleSpan = item.querySelector('.notif-item-title');
+            if (titleSpan) titleSpan.classList.remove('text-primary');
+          });
+          btnMarkAll.innerHTML = '<span class="text-success"><i class="bi bi-check2"></i> Done</span>';
+          setTimeout(() => { btnMarkAll.style.display = 'none'; }, 1200);
+        }
+      } catch (err) {
+        console.error('Failed to mark all as read:', err);
+        btnMarkAll.disabled = false;
+        btnMarkAll.innerHTML = '<i class="bi bi-check2-all"></i> Mark all read';
+      }
+    });
+  }
+});
+</script>
