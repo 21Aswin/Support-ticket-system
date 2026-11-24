@@ -63,7 +63,7 @@ $topbarUnreadCount = $notifOverviewRes['body']['meta']['unread_count'] ?? 0;
                       <?= e($tn['title']) ?>
                     </span>
                     <span class="text-muted" style="font-size: 10px; white-space: nowrap;">
-                      <?= date('M d, H:i', strtotime($tn['created_at'])) ?>
+                      <?= format_datetime($tn['created_at'], 'M d, g:i A') ?>
                     </span>
                   </div>
                   <div class="text-muted small text-truncate" style="font-size: 11.5px;">

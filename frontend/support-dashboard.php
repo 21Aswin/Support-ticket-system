@@ -155,7 +155,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <span class="text-muted small"><?= date('M d, Y', strtotime($ticket['created_at'])) ?></span>
                   </td>
                   <td>
-                    <span class="text-muted small"><?= date('M d, H:i', strtotime($ticket['updated_at'])) ?></span>
+                    <span class="text-muted small"><?= format_datetime($ticket['updated_at'], 'M d, g:i A') ?></span>
                   </td>
                   <td class="text-end">
                     <a href="ticket-details.php?id=<?= e($ticket['id']) ?>" class="btn btn-sm btn-primary-custom">

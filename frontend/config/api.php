@@ -5,6 +5,41 @@
  * PHP never queries PostgreSQL directly.
  */
 
+// Application Timezone configuration (Defaults to Asia/Kolkata - IST UTC+05:30)
+$appTimezone = getenv('APP_TIMEZONE') ?: 'Asia/Kolkata';
+date_default_timezone_set($appTimezone);
+
+/**
+ * Friendly Datetime Formatter (defaults to Asia/Kolkata local time)
+ * e.g., "Nov 24, 2026 at 11:43 AM"
+ */
+function format_datetime($isoDate, $format = 'M j, Y \a\t g:i A') {
+    if (empty($isoDate)) return '—';
+    $ts = is_numeric($isoDate) ? (int)$isoDate : strtotime($isoDate);
+    if (!$ts) return '—';
+    return date($format, $ts);
+}
+
+/**
+ * Friendly Date Formatter: "Nov 24, 2026"
+ */
+function format_date($isoDate, $format = 'M d, Y') {
+    if (empty($isoDate)) return '—';
+    $ts = is_numeric($isoDate) ? (int)$isoDate : strtotime($isoDate);
+    if (!$ts) return '—';
+    return date($format, $ts);
+}
+
+/**
+ * Friendly Time Formatter: "11:43 AM"
+ */
+function format_time($isoDate, $format = 'g:i A') {
+    if (empty($isoDate)) return '—';
+    $ts = is_numeric($isoDate) ? (int)$isoDate : strtotime($isoDate);
+    if (!$ts) return '—';
+    return date($format, $ts);
+}
+
 if (session_status() === PHP_SESSION_NONE) {
     // Secure session cookies
     ini_set('session.cookie_httponly', 1);

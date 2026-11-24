@@ -154,7 +154,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                       <?php endif; ?>
                     </div>
                     <span class="text-muted small">
-                      <i class="bi bi-clock me-1"></i><?= date('M d, Y \a\t g:i A', strtotime($n['created_at'])) ?>
+                      <i class="bi bi-clock me-1"></i><?= format_datetime($n['created_at']) ?>
                     </span>
                   </div>
 

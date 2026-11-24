@@ -120,7 +120,7 @@ require_once __DIR__ . '/includes/sidebar.php';
           <span class="badge-status badge-<?= e($statusSlug) ?> fs-6"><?= e($ticket['status']) ?></span>
           <span class="badge-priority badge-<?= e($prioritySlug) ?>"><?= e($ticket['priority']) ?> Priority</span>
         </div>
-        <p class="text-muted mb-0">Created on <?= date('F j, Y \a\t g:i A', strtotime($ticket['created_at'])) ?></p>
+        <p class="text-muted mb-0">Created on <?= format_datetime($ticket['created_at']) ?></p>
       </div>
       <div class="page-actions">
         <a href="ticket-list.php" class="btn btn-outline-custom">
@@ -163,7 +163,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <i class="bi bi-check-circle-fill"></i> Resolution Details
               </h5>
               <?php if (!empty($ticket['resolved_at'])): ?>
-                <span class="text-muted small">Resolved at <?= date('M d, Y H:i', strtotime($ticket['resolved_at'])) ?></span>
+                <span class="text-muted small">Resolved on <?= format_datetime($ticket['resolved_at']) ?></span>
               <?php endif; ?>
             </div>
             <div class="p-3 bg-white rounded-3 border text-dark" style="font-size: 13.5px; line-height: 1.6; white-space: pre-wrap;">
@@ -203,7 +203,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                         <span class="user-profile-badge <?= e($authorRoleClass) ?> ms-1"><?= e($comm['user_role']) ?></span>
                       </div>
                     </div>
-                    <span class="comment-time"><?= date('M j, Y \a\t g:i A', strtotime($comm['created_at'])) ?></span>
+                    <span class="comment-time"><?= format_datetime($comm['created_at']) ?></span>
                   </div>
                   <div class="comment-body">
                     <?= e($comm['comment']) ?>
@@ -264,7 +264,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                       <span class="timeline-author">
                         <?= e($event['actor_name']) ?> (<?= e($event['actor_role']) ?>)
                       </span>
-                      <span><?= date('M j, Y \a\t g:i A', strtotime($event['created_at'])) ?></span>
+                      <span><?= format_datetime($event['created_at']) ?></span>
                     </div>
                     <div class="timeline-body">
                       <strong><?= e($event['action']) ?></strong>: <?= e($event['details']) ?>
@@ -394,12 +394,12 @@ require_once __DIR__ . '/includes/sidebar.php';
 
           <div class="mb-3">
             <span class="text-muted d-block small">Submitted On</span>
-            <span class="text-dark small"><?= date('M d, Y H:i', strtotime($ticket['created_at'])) ?></span>
+            <span class="text-dark small"><?= format_datetime($ticket['created_at']) ?></span>
           </div>
 
           <div>
             <span class="text-muted d-block small">Last Modified</span>
-            <span class="text-dark small"><?= date('M d, Y H:i', strtotime($ticket['updated_at'])) ?></span>
+            <span class="text-dark small"><?= format_datetime($ticket['updated_at']) ?></span>
           </div>
         </div>
       </div>
