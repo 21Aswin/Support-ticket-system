@@ -1,4 +1,27 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+if (!file_exists(__DIR__ . '/config/api.php')) {
+    echo "<div style='font-family:sans-serif; padding:30px; background:#fff3cd; color:#856404; border:2px solid #ffeeba; border-radius:8px; max-width:700px; margin:40px auto; box-shadow:0 4px 12px rgba(0,0,0,0.1);'>";
+    echo "<h2 style='margin-top:0;'>⚠️ 'config/' folder missing in public_html</h2>";
+    echo "<p>Directory: <code>" . htmlspecialchars(__DIR__) . "</code></p>";
+    echo "<p><b>Items currently inside this folder:</b></p><ul style='line-height:1.8;'>";
+    $items = scandir(__DIR__);
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') continue;
+        $isDir = is_dir(__DIR__ . '/' . $item) ? '📁 <b>[Folder]</b>' : '📄 [File]';
+        echo "<li>$isDir " . htmlspecialchars($item) . "</li>";
+    }
+    echo "</ul>";
+    echo "<hr style='border:0; border-top:1px solid #ffeeba; margin:20px 0;'>";
+    echo "<p><b>How to fix in Hostinger File Manager:</b><br>";
+    echo "Make sure the 3 subfolders (<b>config</b>, <b>includes</b>, <b>assets</b>) are directly inside <code>public_html/</code>.</p>";
+    echo "</div>";
+    exit;
+}
+
 require_once __DIR__ . '/config/api.php';
 require_once __DIR__ . '/config/auth.php';
 

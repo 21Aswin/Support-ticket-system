@@ -127,6 +127,40 @@ async function createTicket({ title, description, category_id, priority = 'Mediu
       [ticket.id, actor.id, `Ticket created with priority ${priority}`]
     );
 
+    // Notify all active Administrators about the newly raised ticket
+    const adminUsersRes = await client.query(
+      `SELECT u.id FROM users u
+       JOIN roles r ON u.role_id = r.id
+       WHERE r.name = 'Admin' AND u.is_active = TRUE`
+    );
+
+    for (const admin of adminUsersRes.rows) {
+      if (admin.id !== actor.id) {
+        await client.query(
+          `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
+           VALUES ($1, $2, 'TICKET_CREATED', $3, $4, FALSE, NOW())`,
+          [
+            admin.id,
+            ticket.id,
+            `New Ticket Raised: ${ticket.ticket_number}`,
+            `${actor.name} submitted a new ${priority} priority ticket: '${ticket.title}'.`,
+          ]
+        );
+      }
+    }
+
+    // Also notify the creator (employee) with submission confirmation
+    await client.query(
+      `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
+       VALUES ($1, $2, 'TICKET_CREATED', $3, $4, FALSE, NOW())`,
+      [
+        actor.id,
+        ticket.id,
+        `Ticket Submitted: ${ticket.ticket_number}`,
+        `Your support request '${ticket.title}' has been submitted successfully and is awaiting review.`,
+      ]
+    );
+
     await client.query('COMMIT');
 
     return {
@@ -364,6 +398,29 @@ async function updateTicketStatus(ticketId, nextStatus, { resolution, reason }, 
           `Ticket '${ticket.title}' was marked as ${nextStatus} by ${actor.name}.`,
         ]
       );
+    }
+
+    // (c) Notify Admins when a ticket is reopened so they can re-evaluate or reassign
+    if (nextStatus === 'Reopened') {
+      const adminUsersRes = await client.query(
+        `SELECT u.id FROM users u
+         JOIN roles r ON u.role_id = r.id
+         WHERE r.name = 'Admin' AND u.is_active = TRUE`
+      );
+      for (const admin of adminUsersRes.rows) {
+        if (admin.id !== actor.id) {
+          await client.query(
+            `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
+             VALUES ($1, $2, 'TICKET_REOPENED', $3, $4, FALSE, NOW())`,
+            [
+              admin.id,
+              ticket.id,
+              `Ticket Reopened: ${ticket.ticket_number}`,
+              `${actor.name} reopened ticket '${ticket.title}'. Reason: ${reason ? reason.trim() : 'Unresolved issue'}`,
+            ]
+          );
+        }
+      }
     }
 
     await client.query('COMMIT');

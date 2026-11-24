@@ -75,9 +75,9 @@ function format_time($isoDate, $format = 'g:i A') {
 
 if (session_status() === PHP_SESSION_NONE) {
     // Secure session cookies
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.use_only_cookies', 1);
-    session_start();
+    @ini_set('session.cookie_httponly', 1);
+    @ini_set('session.use_only_cookies', 1);
+    @session_start();
 }
 
 function get_api_base_url() {

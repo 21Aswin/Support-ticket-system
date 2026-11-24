@@ -96,6 +96,29 @@ async function addComment(req, res, next) {
       );
     }
 
+    // If ticket has no assigned staff, notify active Admins about the comment
+    if (!ticket.assigned_to) {
+      const adminUsersRes = await db.query(
+        `SELECT u.id FROM users u
+         JOIN roles r ON u.role_id = r.id
+         WHERE r.name = 'Admin' AND u.is_active = TRUE`
+      );
+      for (const admin of adminUsersRes.rows) {
+        if (admin.id !== req.user.id) {
+          await db.query(
+            `INSERT INTO notifications (user_id, ticket_id, type, title, message, is_read, created_at)
+             VALUES ($1, $2, 'COMMENT', $3, $4, FALSE, NOW())`,
+            [
+              admin.id,
+              ticket.id,
+              `New Comment on Unassigned Ticket: ${ticket.ticket_number}`,
+              `${req.user.name} added a comment on '${ticket.title}'.`,
+            ]
+          );
+        }
+      }
+    }
+
     return res.status(201).json({
       success: true,
       message: 'Comment added successfully',
