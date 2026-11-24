@@ -129,6 +129,7 @@ require_once __DIR__ . '/includes/sidebar.php';
       const pData = <?= json_encode($stats['priority_breakdown'] ?? []) ?>;
       const pLabels = ['Low', 'Medium', 'High', 'Critical'];
       const pCounts = pLabels.map(l => pData[l] || 0);
+      const totalP = pCounts.reduce((a, b) => a + b, 0);
 
       const ctxPriority = document.getElementById('priorityChart').getContext('2d');
       new Chart(ctxPriority, {
@@ -145,7 +146,18 @@ require_once __DIR__ . '/includes/sidebar.php';
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const val = context.parsed.y || 0;
+                  const pct = totalP > 0 ? ((val / totalP) * 100).toFixed(1) + '%' : '0%';
+                  return ` Incidents: ${val} (${pct})`;
+                }
+              }
+            }
+          },
           scales: {
             y: { beginAtZero: true, ticks: { precision: 0 } }
           }

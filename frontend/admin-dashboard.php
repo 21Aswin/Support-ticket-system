@@ -125,8 +125,9 @@ require_once __DIR__ . '/includes/sidebar.php';
       <!-- Status Donut Chart -->
       <div class="col-lg-4 col-md-6">
         <div class="card-custom h-100">
-          <div class="card-custom-header">
-            <h5 class="card-custom-title"><i class="bi bi-pie-chart-fill text-primary"></i> Ticket Status Breakdown</h5>
+          <div class="card-custom-header d-flex justify-content-between align-items-center">
+            <h5 class="card-custom-title mb-0"><i class="bi bi-pie-chart-fill text-primary"></i> Ticket Status Breakdown</h5>
+            <span class="badge bg-light text-primary border" style="font-size: 11px;">Share (%)</span>
           </div>
           <div style="position: relative; height: 240px;">
             <canvas id="statusChart"></canvas>
@@ -137,8 +138,9 @@ require_once __DIR__ . '/includes/sidebar.php';
       <!-- Category Breakdown Chart -->
       <div class="col-lg-4 col-md-6">
         <div class="card-custom h-100">
-          <div class="card-custom-header">
-            <h5 class="card-custom-title"><i class="bi bi-bar-chart-fill text-info"></i> Frequent Categories</h5>
+          <div class="card-custom-header d-flex justify-content-between align-items-center">
+            <h5 class="card-custom-title mb-0"><i class="bi bi-bar-chart-fill text-info"></i> Frequent Categories</h5>
+            <span class="badge bg-light text-muted border" style="font-size: 11px;">Volume</span>
           </div>
           <div style="position: relative; height: 240px;">
             <canvas id="categoryChart"></canvas>
@@ -275,10 +277,11 @@ require_once __DIR__ . '/includes/sidebar.php';
   <!-- Interactive Charts Initialization -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      // 1. Status Donut Chart
+      // 1. Status Donut Chart with Percentages
       const statusData = <?= json_encode($stats['status_breakdown']) ?>;
       const statusLabels = Object.keys(statusData);
       const statusValues = Object.values(statusData);
+      const totalStatusTickets = statusValues.reduce((sum, val) => sum + val, 0);
 
       const statusColors = {
         'Open': '#0B6DB7',
@@ -307,17 +310,87 @@ require_once __DIR__ . '/includes/sidebar.php';
           plugins: {
             legend: {
               position: 'bottom',
-              labels: { boxWidth: 12, font: { size: 11 } }
+              labels: {
+                boxWidth: 12,
+                font: { size: 11, weight: '500' },
+                padding: 10,
+                generateLabels: function(chart) {
+                  const data = chart.data;
+                  if (data.labels.length && data.datasets.length) {
+                    return data.labels.map(function(label, i) {
+                      const value = data.datasets[0].data[i] || 0;
+                      const pct = totalStatusTickets > 0 
+                        ? ((value / totalStatusTickets) * 100).toFixed(1) + '%' 
+                        : '0%';
+                      return {
+                        text: `${label} (${pct})`,
+                        fillStyle: data.datasets[0].backgroundColor[i],
+                        strokeStyle: '#FFFFFF',
+                        lineWidth: 1,
+                        hidden: !chart.isDatasetVisible(0),
+                        index: i
+                      };
+                    });
+                  }
+                  return [];
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed || 0;
+                  const pct = totalStatusTickets > 0 
+                    ? ((value / totalStatusTickets) * 100).toFixed(1) + '%' 
+                    : '0%';
+                  return ` ${label}: ${pct} (${value} ${value === 1 ? 'ticket' : 'tickets'})`;
+                }
+              }
             }
           },
           cutout: '65%'
-        }
+        },
+        plugins: [{
+          id: 'doughnutCenterText',
+          beforeDraw(chart) {
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return;
+            const centerX = (chartArea.left + chartArea.right) / 2;
+            const centerY = (chartArea.top + chartArea.bottom) / 2;
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            const active = chart.getActiveElements();
+            let line1 = 'TOTAL';
+            let line2 = totalStatusTickets + ' Tickets';
+            
+            if (active && active.length > 0) {
+              const idx = active[0].index;
+              const val = statusValues[idx] || 0;
+              const pct = totalStatusTickets > 0 ? ((val / totalStatusTickets) * 100).toFixed(1) + '%' : '0%';
+              line1 = (statusLabels[idx] || '').toUpperCase();
+              line2 = pct;
+            }
+            
+            ctx.font = '600 11px Inter, sans-serif';
+            ctx.fillStyle = '#64748B';
+            ctx.fillText(line1, centerX, centerY - 9);
+            
+            ctx.font = '700 17px Inter, sans-serif';
+            ctx.fillStyle = '#064B8F';
+            ctx.fillText(line2, centerX, centerY + 11);
+            ctx.restore();
+          }
+        }]
       });
 
-      // 2. Category Bar Chart
+      // 2. Category Bar Chart with Percentages in Tooltips
       const categoryData = <?= json_encode($stats['category_breakdown']) ?>;
       const catLabels = categoryData.map(c => c.category_name);
       const catCounts = categoryData.map(c => c.count);
+      const totalCatTickets = catCounts.reduce((a, b) => a + b, 0);
 
       const ctxCat = document.getElementById('categoryChart').getContext('2d');
       new Chart(ctxCat, {
@@ -335,7 +408,18 @@ require_once __DIR__ . '/includes/sidebar.php';
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { display: false }
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const val = context.parsed.y || 0;
+                  const pct = totalCatTickets > 0 
+                    ? ((val / totalCatTickets) * 100).toFixed(1) + '%' 
+                    : '0%';
+                  return ` Volume: ${val} tickets (${pct})`;
+                }
+              }
+            }
           },
           scales: {
             y: {
