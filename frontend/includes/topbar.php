@@ -37,7 +37,7 @@ $topbarUnreadCount = $notifOverviewRes['body']['meta']['unread_count'] ?? 0;
             <span class="notification-badge-count"><?= $topbarUnreadCount > 99 ? '99+' : $topbarUnreadCount ?></span>
           <?php endif; ?>
         </button>
-        <div class="dropdown-menu dropdown-menu-end shadow p-0" style="width: 320px; border-radius: 10px; border: 1px solid var(--border-color); overflow: hidden;">
+        <div class="dropdown-menu dropdown-menu-end shadow p-0 notif-dropdown-menu">
           <div class="p-3 bg-light border-bottom d-flex align-items-center justify-content-between">
             <span class="fw-bold text-dark" style="font-size: 13px;">
               <i class="bi bi-bell-fill me-1 text-primary"></i> Notifications
@@ -104,10 +104,10 @@ $topbarUnreadCount = $notifOverviewRes['body']['meta']['unread_count'] ?? 0;
           <span class="user-profile-badge <?= e($roleClass) ?>"><?= e($role) ?></span>
         </div>
       </button>
-      <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius: 8px; border: 1px solid var(--border-color); font-size: 13px;">
+      <ul class="dropdown-menu dropdown-menu-end shadow-sm user-profile-dropdown-menu">
         <li class="px-3 py-2 border-bottom">
-          <div class="fw-bold text-dark"><?= e($user['name'] ?? 'User') ?></div>
-          <div class="text-muted small"><?= e($user['email'] ?? '') ?></div>
+          <div class="fw-bold text-dark text-truncate" style="max-width: 220px;"><?= e($user['name'] ?? 'User') ?></div>
+          <div class="text-muted small text-truncate" style="max-width: 220px;"><?= e($user['email'] ?? '') ?></div>
         </li>
         <li><a class="dropdown-item py-2" href="notifications.php"><i class="bi bi-bell me-2 text-primary"></i> Notifications</a></li>
         <li><a class="dropdown-item py-2" href="settings.php"><i class="bi bi-person me-2 text-primary"></i> Profile & Settings</a></li>

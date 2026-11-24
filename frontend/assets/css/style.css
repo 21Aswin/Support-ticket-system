@@ -416,6 +416,31 @@ body {
   border-bottom: none;
 }
 
+/* Dropdown Menus - Base Safeguards */
+.dropdown-menu {
+  max-width: calc(100vw - 20px);
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+.notif-dropdown-menu {
+  width: 340px;
+  max-width: calc(100vw - 24px);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.user-profile-dropdown-menu {
+  min-width: 200px;
+  max-width: calc(100vw - 24px);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-size: 13px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
 .user-profile-dropdown {
   position: relative;
 }
@@ -1146,6 +1171,34 @@ textarea.form-control-custom {
 
   .filter-bar > * {
     width: 100%;
+  }
+
+  /* Universal Mobile Dropdown Guard */
+  .dropdown-menu {
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  /* Notifications dropdown on mobile - fixed neatly below topbar */
+  .notif-dropdown-menu {
+    position: fixed !important;
+    top: 64px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: min(380px, calc(100vw - 24px)) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    transform: none !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18) !important;
+    border-radius: 12px !important;
+    z-index: 1060 !important;
+  }
+
+  /* User profile dropdown on mobile */
+  .user-profile-dropdown-menu {
+    max-width: calc(100vw - 24px) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
   }
 }
 
