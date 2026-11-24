@@ -148,152 +148,84 @@ async function generateDescription(req, res, next) {
     }
 
     const catLower = (category || '').toLowerCase();
+    const titleLower = trimmedTitle.toLowerCase();
+    const userName = (req.user && req.user.name) ? req.user.name : 'Authorized Employee';
+
+    const urgencyNote = {
+      Critical: 'Since this is completely halting my daily work activities, your urgent assistance would be greatly appreciated.',
+      High: 'As this is causing significant delays to my time-sensitive deliverables, a prompt resolution would be very helpful.',
+      Medium: 'Please look into this issue and assist with remediation at your earliest convenience.',
+      Low: 'Please inspect and assist whenever feasible.',
+    }[priority] || 'Please assist with technical diagnosis and remediation.';
+
     let template = '';
 
-    const priorityImpact = {
-      Low: 'Low operational impact. Minor inquiry or non-urgent setup task.',
-      Medium: 'Moderate impediment to daily work. Standard technical remediation requested.',
-      High: 'Significant disruption to productivity. Time-sensitive business tasks impeded.',
-      Critical: 'Severe operational stoppage. Core systems or communication completely blocked.',
-    }[priority] || 'Standard technical assistance requested.';
+    if (catLower.includes('network') || catLower.includes('wi-fi') || catLower.includes('wifi') || catLower.includes('vpn') || titleLower.includes('wifi') || titleLower.includes('vpn') || titleLower.includes('network')) {
+      template = `Hi Team,
 
-    if (catLower.includes('network') || catLower.includes('wi-fi') || catLower.includes('wifi') || catLower.includes('vpn') || trimmedTitle.toLowerCase().includes('wifi') || trimmedTitle.toLowerCase().includes('vpn') || trimmedTitle.toLowerCase().includes('network')) {
-      template = `[Issue Summary]
-${trimmedTitle}
+I am writing to report a network connectivity issue regarding "${trimmedTitle}". Currently, my workstation is experiencing persistent connection drops with the office network, which is preventing me from accessing corporate portals and internal company tools.
 
-[Category & Urgency]
-- Issue Category: ${category || 'Network Issue'}
-- Priority Level: ${priority}
-- Business Impact: ${priorityImpact}
+I have already tried restarting my laptop, toggling the Wi-Fi adapter off and on, and checking the office network connections, but the problem continues. Could you please check the network access permissions, gateway routing, and DNS settings for my device?
 
-[Observed Symptoms]
-- Primary Problem: ${trimmedTitle}
-- Connectivity Status: Unable to establish a stable connection with the office network / gateway.
-- Affected Systems: Workstation, corporate portals, and remote connectivity services.
-- Frequency: Persistent during active office working hours.
+${urgencyNote}
 
-[Troubleshooting Steps Attempted]
-1. Toggled network adapter / Wi-Fi off and back on.
-2. Verified physical cable connections and office access point signal.
-3. Restarted workstation and attempted network reconnection.
+Thanks & regards,
+${userName}`;
+    } else if (catLower.includes('hardware') || catLower.includes('printer') || catLower.includes('laptop') || catLower.includes('monitor') || titleLower.includes('printer') || titleLower.includes('laptop') || titleLower.includes('monitor') || titleLower.includes('mouse') || titleLower.includes('keyboard')) {
+      template = `Hi Team,
 
-[Workstation Environment]
-- Operating System: Windows 11 Enterprise (Corporate Device)
-- Connection Type: Corporate Wi-Fi / Local Subnet
+I am reaching out to report a hardware problem regarding "${trimmedTitle}". My equipment is malfunctioning during normal office hours, making it difficult to complete my assigned tasks effectively.
 
-[Requested IT Action]
-Kindly check network access permissions, gateway routing, and DNS configuration for this device.`;
-    } else if (catLower.includes('hardware') || catLower.includes('printer') || catLower.includes('laptop') || catLower.includes('monitor') || trimmedTitle.toLowerCase().includes('printer') || trimmedTitle.toLowerCase().includes('laptop') || trimmedTitle.toLowerCase().includes('monitor')) {
-      template = `[Issue Summary]
-${trimmedTitle}
+I have already inspected all physical cables and power connections, tested alternative display ports, and performed a full restart of the hardware, but the issue remains unresolved. Could you please arrange for an IT support technician to inspect the device, repair the faulty component, or advise on a replacement?
 
-[Category & Urgency]
-- Issue Category: ${category || 'Hardware Issue'}
-- Priority Level: ${priority}
-- Business Impact: ${priorityImpact}
+${urgencyNote}
 
-[Observed Symptoms]
-- Primary Problem: ${trimmedTitle}
-- Device Status: Equipment is malfunctioning, unresponsive, or displaying hardware warning.
-- Occurrence: Started during normal daily use at office workspace.
+Thanks & regards,
+${userName}`;
+    } else if (catLower.includes('access') || catLower.includes('card') || catLower.includes('permission') || catLower.includes('login') || catLower.includes('account') || titleLower.includes('access') || titleLower.includes('permission') || titleLower.includes('card') || titleLower.includes('login') || titleLower.includes('password')) {
+      template = `Hi Team,
 
-[Troubleshooting Steps Attempted]
-1. Checked power source, physical cables, and interface adapters (HDMI / USB-C / Power).
-2. Performed a full power cycle of the workstation and peripheral equipment.
-3. Tested alternative ports / cables with no change in behavior.
+I would like to request system access permissions regarding "${trimmedTitle}". I require standard access rights and credentials for this system to fulfill my daily project responsibilities and team workflows.
 
-[Hardware Details]
-- Equipment Type: Corporate Laptop / Monitor / Peripheral
-- Physical Location: Assigned Office Workspace / Desk
+Could you please review my access request, verify my permissions, and provision the required account credentials or security clearance for my profile?
 
-[Requested IT Action]
-Kindly inspect the hardware, replace faulty cables or components, or arrange hardware maintenance.`;
-    } else if (catLower.includes('access') || catLower.includes('card') || catLower.includes('permission') || catLower.includes('login') || catLower.includes('account') || trimmedTitle.toLowerCase().includes('access') || trimmedTitle.toLowerCase().includes('permission') || trimmedTitle.toLowerCase().includes('card')) {
-      template = `[Issue Summary]
-${trimmedTitle}
+${urgencyNote}
 
-[Category & Urgency]
-- Issue Category: ${category || 'Access Request'}
-- Priority Level: ${priority}
-- Business Impact: ${priorityImpact}
+Thank you for your assistance,
+${userName}`;
+    } else if (catLower.includes('email') || catLower.includes('outlook') || catLower.includes('mailbox') || titleLower.includes('email') || titleLower.includes('mail') || titleLower.includes('outlook')) {
+      template = `Hi Team,
 
-[Access Request Details]
-- Target Resource / System: ${trimmedTitle}
-- Requested Role / Permission: Standard User Access / Read & Write Permissions
-- Business Justification: Required to fulfill primary daily project duties and team workflows.
+I am experiencing an issue with my corporate email account regarding "${trimmedTitle}". I am unable to reliably send or receive messages, and Microsoft Outlook is encountering synchronization delays and repeated credential prompts.
 
-[Requester Details]
-- Requester: ${req.user ? req.user.name : 'Authorized Employee'}
-- Email: ${req.user ? req.user.email : 'employee@helpdesk.local'}
-- Department / Role: ${req.user ? req.user.role : 'Employee'}
+I have already confirmed that my internet connection is working, restarted the email application, and tried logging in via the webmail portal, but the synchronization problem persists. Could you please check my mailbox server status, storage quota, and account routing?
 
-[Requested IT Action]
-Please review access approval and provision the appropriate account credentials or security badge activation.`;
-    } else if (catLower.includes('email') || catLower.includes('outlook') || catLower.includes('mailbox') || trimmedTitle.toLowerCase().includes('email') || trimmedTitle.toLowerCase().includes('mail') || trimmedTitle.toLowerCase().includes('outlook')) {
-      template = `[Issue Summary]
-${trimmedTitle}
+${urgencyNote}
 
-[Category & Urgency]
-- Issue Category: ${category || 'Email Issue'}
-- Priority Level: ${priority}
-- Business Impact: ${priorityImpact}
+Thanks & regards,
+${userName}`;
+    } else if (catLower.includes('software') || catLower.includes('app') || catLower.includes('install') || titleLower.includes('software') || titleLower.includes('install') || titleLower.includes('crash')) {
+      template = `Hi Team,
 
-[Observed Symptoms]
-- Primary Problem: ${trimmedTitle}
-- Mail Client: Microsoft Outlook / Webmail Portal
-- Behavior: Experiencing delivery delays, mailbox synchronization faults, or credential prompts.
+I am encountering an issue with software application regarding "${trimmedTitle}". The application is either crashing unexpectedly during usage, failing to launch properly, or prompting for administrator privileges to proceed with installation or updates.
 
-[Troubleshooting Steps Attempted]
-1. Verified active internet connection and browser access.
-2. Restarted the email client and tested login via webmail portal.
-3. Checked mailbox storage quota and outgoing folder status.
+I have already attempted closing conflicting background processes, restarting the application, and rebooting my system, but the error continues. Could you please assist with troubleshooting this software error, verifying licensing, or providing the necessary administrative permissions?
 
-[Requested IT Action]
-Please inspect mailbox server status, account synchronization, and corporate email routing.`;
-    } else if (catLower.includes('software') || catLower.includes('app') || catLower.includes('install') || trimmedTitle.toLowerCase().includes('software') || trimmedTitle.toLowerCase().includes('install')) {
-      template = `[Issue Summary]
-${trimmedTitle}
+${urgencyNote}
 
-[Category & Urgency]
-- Issue Category: ${category || 'Software Issue'}
-- Priority Level: ${priority}
-- Business Impact: ${priorityImpact}
-
-[Observed Symptoms]
-- Application / Component: ${trimmedTitle}
-- Problem Details: Software fails to launch, crashes unexpectedly, or requires administrative privileges to install.
-- Frequency: Persistent upon launch or installation attempt.
-
-[Troubleshooting Steps Attempted]
-1. Terminated background processes and relaunched application.
-2. Verified system requirements and checked for pending OS updates.
-3. Attempted standard installation wizard (blocked by administrative policy).
-
-[Workstation Environment]
-- Operating System: Windows 11 Enterprise 64-bit
-
-[Requested IT Action]
-Kindly assist with software deployment, licensing verification, or troubleshooting application errors.`;
+Thanks & regards,
+${userName}`;
     } else {
-      template = `[Issue Summary]
-${trimmedTitle}
+      template = `Hi Team,
 
-[Category & Urgency]
-- Issue Category: ${category || 'General Support'}
-- Priority Level: ${priority}
-- Business Impact: ${priorityImpact}
+I am writing to report a technical support issue regarding "${trimmedTitle}". This issue is disrupting my routine workflow and preventing me from completing my daily tasks efficiently.
 
-[Detailed Description]
-- Technical Issue: ${trimmedTitle}
-- Operational Impact: Work disruption encountered during routine daily workflows.
-- Frequency: Recurring issue requiring IT support investigation.
+I have already restarted the affected application and verified my standard workstation settings, but the problem continues to occur. Could you please look into this matter and assist with technical diagnosis and resolution?
 
-[Troubleshooting Steps Attempted]
-1. Restarted affected application and workstation.
-2. Verified standard user configuration and network connections.
+${urgencyNote}
 
-[Requested IT Action]
-Please investigate this support ticket and assist with technical diagnosis and resolution.`;
+Thanks & regards,
+${userName}`;
     }
 
     return res.status(200).json({

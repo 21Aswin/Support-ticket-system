@@ -364,9 +364,34 @@ require_once __DIR__ . '/includes/sidebar.php';
         });
       }
 
-      // 4. Client-side fallback generator
+      // 4. Client-side fallback generator (natural paragraph format)
       function generateFallbackTemplate(title, category, priority) {
-        return `[Issue Summary]\n${title}\n\n[Category & Urgency]\n- Issue Category: ${category || 'Technical Support'}\n- Priority Level: ${priority}\n\n[Observed Symptoms]\n- Primary Problem: ${title}\n- Error / Behavior: Encountered unexpected failure during standard operations.\n- Frequency: Ongoing / Reproducible during office working hours.\n\n[Troubleshooting Steps Attempted]\n1. Restarted application and workstation hardware.\n2. Verified physical connections and network status.\n\n[Requested IT Action]\nKindly investigate this issue and assist with diagnosis and remediation.`;
+        const urgency = priority === 'Critical' 
+          ? 'This is critically impacting my work and I would really appreciate an urgent resolution.'
+          : priority === 'High'
+          ? 'This is quite urgent and affecting my productivity, so a prompt resolution would be greatly appreciated.'
+          : priority === 'Low'
+          ? 'This is not super urgent, but I would appreciate it being looked into when time permits.'
+          : 'I would appreciate it if someone could look into this at the earliest convenience.';
+
+        const cat = (category || 'technical').toLowerCase();
+        let context = '';
+
+        if (cat.includes('network')) {
+          context = `I'm currently facing a network-related issue — specifically regarding "${title}". I've been unable to maintain a stable connection to the office network, which is affecting my ability to access corporate portals and work resources. I've already tried toggling the Wi-Fi, checking the cable connections, and restarting my workstation, but the problem persists.`;
+        } else if (cat.includes('hardware')) {
+          context = `I'm writing to report a hardware issue — "${title}". The device/component isn't functioning as expected, and it's disrupting my regular workflow. I've tried basic troubleshooting like restarting the system and checking physical connections, but the issue remains unresolved.`;
+        } else if (cat.includes('access')) {
+          context = `I need assistance with an access-related request — "${title}". I'm currently unable to access certain systems or resources required for my work. I've verified my credentials and tried logging in multiple times, but I'm still facing restrictions.`;
+        } else if (cat.includes('email')) {
+          context = `I'm experiencing an email-related issue — "${title}". My email client is not working as expected, and it's affecting my ability to communicate and stay updated on work matters. I've already tried restarting the application and checking my internet connection.`;
+        } else if (cat.includes('software')) {
+          context = `I'm facing a software-related issue — "${title}". The application is not behaving as expected, which is hindering my day-to-day tasks. I've tried restarting the application and my workstation, but the problem continues.`;
+        } else {
+          context = `I'm reaching out regarding an issue I've been facing — "${title}". This has been affecting my regular workflow and I haven't been able to resolve it on my own despite some basic troubleshooting attempts.`;
+        }
+
+        return `Hi Team,\n\n${context}\n\n${urgency}\n\nThank you for your support.\nBest regards`;
       }
 
       // 5. Smart Hint on Category change
