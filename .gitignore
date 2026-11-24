@@ -24,3 +24,6 @@ desktop.ini
 # Session and temp files
 sessions/
 *.tmp
+test-results/
+playwright-report/
+backend/test-results/
