@@ -68,8 +68,8 @@ require_once __DIR__ . '/includes/sidebar.php';
         </div>
 
         <!-- Status Filter -->
-        <div style="min-width: 150px;">
-          <select name="status" class="form-select form-control-custom" onchange="this.form.submit()">
+        <div class="filter-item" style="min-width: 150px;">
+          <select name="status" id="filter_status" data-custom-select="true" class="form-select form-control-custom" onchange="this.form.submit()">
             <option value="">-- All Statuses --</option>
             <option value="Open" <?= $statusFilter === 'Open' ? 'selected' : '' ?>>Open</option>
             <option value="Assigned" <?= $statusFilter === 'Assigned' ? 'selected' : '' ?>>Assigned</option>
@@ -81,8 +81,8 @@ require_once __DIR__ . '/includes/sidebar.php';
         </div>
 
         <!-- Priority Filter -->
-        <div style="min-width: 140px;">
-          <select name="priority" class="form-select form-control-custom" onchange="this.form.submit()">
+        <div class="filter-item" style="min-width: 140px;">
+          <select name="priority" id="filter_priority" data-custom-select="true" class="form-select form-control-custom" onchange="this.form.submit()">
             <option value="">-- All Priorities --</option>
             <option value="Low" <?= $priorityFilter === 'Low' ? 'selected' : '' ?>>Low</option>
             <option value="Medium" <?= $priorityFilter === 'Medium' ? 'selected' : '' ?>>Medium</option>
@@ -92,8 +92,8 @@ require_once __DIR__ . '/includes/sidebar.php';
         </div>
 
         <!-- Category Filter -->
-        <div style="min-width: 160px;">
-          <select name="category_id" class="form-select form-control-custom" onchange="this.form.submit()">
+        <div class="filter-item" style="min-width: 160px;">
+          <select name="category_id" id="filter_category_id" data-custom-select="true" class="form-select form-control-custom" onchange="this.form.submit()">
             <option value="">-- All Categories --</option>
             <?php foreach ($categories as $cat): ?>
               <option value="<?= e($cat['id']) ?>" <?= (string)$categoryFilter === (string)$cat['id'] ? 'selected' : '' ?>>

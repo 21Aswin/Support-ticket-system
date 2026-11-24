@@ -200,7 +200,12 @@ require_once __DIR__ . '/includes/sidebar.php';
 
             <div class="form-group mb-3">
               <label for="new_password" class="form-label">Initial Password <span class="text-danger">*</span></label>
-              <input type="password" id="new_password" name="password" class="form-control form-control-custom" placeholder="Set temporary password" required minlength="6">
+              <div class="input-group">
+                <input type="password" id="new_password" name="password" class="form-control form-control-custom border-end-0" placeholder="Set temporary password" required minlength="6">
+                <button type="button" class="btn btn-outline-secondary border-start-0 bg-white text-muted password-toggle-btn" data-target="new_password" title="Show password" tabindex="-1">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
             </div>
 
             <div class="form-group mb-3">

@@ -14,13 +14,15 @@ function initCustomSelects() {
     if (select.dataset.customSelectInitialized === 'true') return;
     select.dataset.customSelectInitialized = 'true';
 
-    function getOptionMeta(option, selectId) {
+    const selectKey = (select.id || select.name || '').toLowerCase();
+
+    function getOptionMeta(option, key) {
       const text = option.text.trim();
       const val = option.value;
       let iconHtml = '';
       let badgeHtml = '';
 
-      if (selectId === 'category_id') {
+      if (key.includes('category')) {
         if (text.includes('Hardware')) iconHtml = '<span class="custom-select-icon"><i class="bi bi-laptop"></i></span>';
         else if (text.includes('Software')) iconHtml = '<span class="custom-select-icon"><i class="bi bi-code-slash"></i></span>';
         else if (text.includes('Network')) iconHtml = '<span class="custom-select-icon"><i class="bi bi-wifi"></i></span>';
@@ -28,11 +30,20 @@ function initCustomSelects() {
         else if (text.includes('Email')) iconHtml = '<span class="custom-select-icon"><i class="bi bi-envelope"></i></span>';
         else if (text.includes('Other')) iconHtml = '<span class="custom-select-icon"><i class="bi bi-tag"></i></span>';
         else if (val === '') iconHtml = '<span class="custom-select-icon" style="background:#F1F5F9; color:#94A3B8;"><i class="bi bi-grid"></i></span>';
-      } else if (selectId === 'priority') {
+      } else if (key.includes('priority')) {
         if (val === 'Low') badgeHtml = '<span class="priority-badge-dot low"></span>';
         else if (val === 'Medium') badgeHtml = '<span class="priority-badge-dot medium"></span>';
         else if (val === 'High') badgeHtml = '<span class="priority-badge-dot high"></span>';
         else if (val === 'Critical') badgeHtml = '<span class="priority-badge-dot critical"></span>';
+        else if (val === '') iconHtml = '<span class="custom-select-icon" style="background:#F1F5F9; color:#94A3B8;"><i class="bi bi-flag"></i></span>';
+      } else if (key.includes('status')) {
+        if (val === 'Open') iconHtml = '<span class="custom-select-icon text-primary" style="background:#EBF5FF;"><i class="bi bi-circle"></i></span>';
+        else if (val === 'Assigned') iconHtml = '<span class="custom-select-icon text-info" style="background:#E0F2FE;"><i class="bi bi-person-check"></i></span>';
+        else if (val === 'In Progress') iconHtml = '<span class="custom-select-icon text-warning" style="background:#FEF3C7;"><i class="bi bi-play-circle"></i></span>';
+        else if (val === 'Resolved') iconHtml = '<span class="custom-select-icon text-success" style="background:#DCFCE7;"><i class="bi bi-check-circle"></i></span>';
+        else if (val === 'Closed') iconHtml = '<span class="custom-select-icon text-secondary" style="background:#F1F5F9;"><i class="bi bi-x-circle"></i></span>';
+        else if (val === 'Reopened') iconHtml = '<span class="custom-select-icon text-danger" style="background:#FEE2E2;"><i class="bi bi-arrow-counterclockwise"></i></span>';
+        else if (val === '') iconHtml = '<span class="custom-select-icon text-muted" style="background:#F1F5F9;"><i class="bi bi-funnel"></i></span>';
       }
       return { iconHtml, badgeHtml, text, val };
     }
@@ -68,14 +79,14 @@ function initCustomSelects() {
       if (!selectedOption || (selectedOption.value === '' && select.selectedIndex === 0)) {
         textSpan.innerHTML = `<span class="custom-select-placeholder">${selectedOption ? selectedOption.text : '-- Select --'}</span>`;
       } else {
-        const meta = getOptionMeta(selectedOption, select.id);
+        const meta = getOptionMeta(selectedOption, selectKey);
         textSpan.innerHTML = `${meta.iconHtml || meta.badgeHtml} <span class="custom-select-option-label">${meta.text}</span>`;
       }
     }
 
     // Populate options
     Array.from(select.options).forEach((opt, index) => {
-      const meta = getOptionMeta(opt, select.id);
+      const meta = getOptionMeta(opt, selectKey);
       const optDiv = document.createElement('div');
       optDiv.className = 'custom-select-option' + (opt.selected ? ' selected' : '');
       optDiv.setAttribute('role', 'option');
@@ -111,6 +122,15 @@ function initCustomSelects() {
         // Fire native events so AI draft and forms detect change
         select.dispatchEvent(new Event('change', { bubbles: true }));
         select.dispatchEvent(new Event('input', { bubbles: true }));
+
+        // Trigger onchange / submit if defined
+        if (select.hasAttribute('onchange')) {
+          if (typeof select.onchange === 'function') {
+            select.onchange();
+          } else if (select.form) {
+            select.form.submit();
+          }
+        }
       });
 
       menu.appendChild(optDiv);
@@ -118,7 +138,6 @@ function initCustomSelects() {
 
     function toggleMenu() {
       const isOpen = wrapper.classList.contains('open');
-      console.log('[CustomSelect] toggleMenu for', select.id, 'currently open:', isOpen);
       if (isOpen) {
         closeMenu();
       } else {
@@ -132,11 +151,23 @@ function initCustomSelects() {
         });
         wrapper.classList.add('open');
         trigger.setAttribute('aria-expanded', 'true');
+
+        // Viewport & boundary safeguard (never spill outside screen)
+        const triggerRect = trigger.getBoundingClientRect();
+        if (triggerRect.right > window.innerWidth - 15) {
+          menu.style.right = '0px';
+          menu.style.left = 'auto';
+        } else {
+          menu.style.left = '0px';
+          menu.style.right = '0px';
+        }
+
         const parentRow = wrapper.closest('.row');
         if (parentRow) parentRow.classList.add('has-open-select');
         const parentFormGroup = wrapper.closest('.form-group');
         if (parentFormGroup) parentFormGroup.classList.add('has-open-select');
-        console.log('[CustomSelect] added .open to wrapper', wrapper.id);
+        const parentFilter = wrapper.closest('.filter-bar');
+        if (parentFilter) parentFilter.classList.add('has-open-select');
         
         // Scroll selected item into view
         const selectedOpt = menu.querySelector('.custom-select-option.selected');
