@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
 <!-- Custom App Interactive Script -->
-<script src="assets/js/main.js"></script>
-<script src="assets/js/custom-select.js"></script>
+<script src="assets/js/main.js?v=2.2"></script>
+<script src="assets/js/custom-select.js?v=2.2"></script>
 </body>
 </html>
