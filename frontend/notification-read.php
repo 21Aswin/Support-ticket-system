@@ -23,14 +23,9 @@ if ($action === 'mark_all_read') {
     exit;
 }
 
-// Mark single notification as read in database
+// Mark ONLY this specific single notification as read
 if ($notifId > 0) {
     api_request('PATCH', "/api/notifications/{$notifId}/read");
-}
-
-// Mark any other notifications for this ticket as read
-if ($ticketId > 0) {
-    api_request('PATCH', "/api/notifications/ticket/{$ticketId}/read");
 }
 
 // Return JSON for AJAX requests

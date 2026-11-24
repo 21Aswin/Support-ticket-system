@@ -68,8 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Automatically mark notifications for this ticket as read for the logged-in user
-api_request('PATCH', "/api/notifications/ticket/{$ticketId}/read");
+// Mark notification as read only if a specific notif_id was provided in the query string
 if (!empty($_GET['notif_id'])) {
     api_request('PATCH', "/api/notifications/" . intval($_GET['notif_id']) . "/read");
 }
