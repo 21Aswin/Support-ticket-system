@@ -61,14 +61,14 @@ require_once __DIR__ . '/includes/sidebar.php';
     <!-- Filter Bar Card -->
     <div class="filter-bar">
       <form method="GET" action="ticket-list.php" class="d-flex flex-wrap align-items-center gap-3 w-100">
-        <!-- Search -->
-        <div class="flex-grow-1" style="min-width: 220px;">
+        <!-- Search (Reduced size to give filter dropdowns optimal space) -->
+        <div class="flex-grow-1" style="min-width: 180px; max-width: 260px;">
           <input type="text" name="search" class="form-control form-control-custom" 
                  placeholder="Search by ticket # or keyword..." value="<?= e($searchQuery) ?>">
         </div>
 
         <!-- Status Filter -->
-        <div class="filter-item" style="min-width: 150px;">
+        <div class="filter-item" style="min-width: 175px;">
           <select name="status" id="filter_status" data-custom-select="true" class="form-select form-control-custom" onchange="this.form.submit()">
             <option value="">-- All Statuses --</option>
             <option value="Open" <?= $statusFilter === 'Open' ? 'selected' : '' ?>>Open</option>
@@ -81,7 +81,7 @@ require_once __DIR__ . '/includes/sidebar.php';
         </div>
 
         <!-- Priority Filter -->
-        <div class="filter-item" style="min-width: 140px;">
+        <div class="filter-item" style="min-width: 160px;">
           <select name="priority" id="filter_priority" data-custom-select="true" class="form-select form-control-custom" onchange="this.form.submit()">
             <option value="">-- All Priorities --</option>
             <option value="Low" <?= $priorityFilter === 'Low' ? 'selected' : '' ?>>Low</option>
@@ -92,7 +92,7 @@ require_once __DIR__ . '/includes/sidebar.php';
         </div>
 
         <!-- Category Filter -->
-        <div class="filter-item" style="min-width: 160px;">
+        <div class="filter-item" style="min-width: 175px;">
           <select name="category_id" id="filter_category_id" data-custom-select="true" class="form-select form-control-custom" onchange="this.form.submit()">
             <option value="">-- All Categories --</option>
             <?php foreach ($categories as $cat): ?>

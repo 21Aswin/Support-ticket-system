@@ -154,12 +154,12 @@ function initCustomSelects() {
 
         // Viewport & boundary safeguard (never spill outside screen)
         const triggerRect = trigger.getBoundingClientRect();
-        if (triggerRect.right > window.innerWidth - 15) {
+        if (triggerRect.left + 220 > window.innerWidth - 15) {
           menu.style.right = '0px';
           menu.style.left = 'auto';
         } else {
           menu.style.left = '0px';
-          menu.style.right = '0px';
+          menu.style.right = 'auto';
         }
 
         const parentRow = wrapper.closest('.row');
